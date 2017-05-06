@@ -21,11 +21,11 @@ NET "A(13)" LOC = "40";
 NET "A(14)" LOC = "37";
 NET "A(15)" LOC = "35";
 
-#NET "B(14)" LOC = "59";
-#NET "B(15)" LOC = "61";
-#NET "B(16)" LOC = "63";
-#NET "B(17)" LOC = "65";
-#NET "B(18)" LOC = "67";
+NET "B(14)" LOC = "59";
+NET "B(15)" LOC = "61";
+NET "B(16)" LOC = "63";
+NET "B(17)" LOC = "65";
+NET "B(18)" LOC = "67";
 
 NET "D(0)" LOC = "36";
 NET "D(1)" LOC = "39";
