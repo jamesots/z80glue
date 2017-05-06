@@ -43,6 +43,13 @@ architecture behavioral of z80glue is
        port ( clk16 : in  std_logic;
               clk4  : out std_logic);
    end component;
+   component bank_register is
+       port ( d   : in  std_logic_vector(7 downto 0);
+              clk : in  std_logic;
+              oe  : in  std_logic;
+              b   : out std_logic_vector(7 downto 0));
+   end component;
+
    signal wait_sig : std_logic;
    
    signal bank0 : std_logic_vector(7 downto 0);
@@ -50,15 +57,32 @@ architecture behavioral of z80glue is
    signal bank2 : std_logic_vector(7 downto 0);
    signal bank3 : std_logic_vector(7 downto 0);
    
-   signal bank_sig : std_logic_vector(7 downto 0);
+   signal bank_sig0 : std_logic_vector(7 downto 0);
+   signal bank_sig1 : std_logic_vector(7 downto 0);
+   signal bank_sig2 : std_logic_vector(7 downto 0);
+   signal bank_sig3 : std_logic_vector(7 downto 0);
    
    signal sel : std_logic_vector(7 downto 0);
    
    type selection is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
        sel_screen_rd, sel_screen_wr, sel_bell, sel_ftdi_status);       
+       
+   signal bank_0_oe: std_logic;
+   signal bank_1_oe: std_logic;
+   signal bank_2_oe: std_logic;
+   signal bank_3_oe: std_logic;
 begin
    clk_div_i: clk_div port map (clk16, clk4);
+   bank_0: bank_register port map (d, sel(0), bank_0_oe, bank_sig0);
+   bank_1: bank_register port map (d, sel(1), bank_1_oe, bank_sig1);
+   bank_2: bank_register port map (d, sel(2), bank_2_oe, bank_sig2);
+   bank_3: bank_register port map (d, sel(3), bank_3_oe, bank_sig3);
+            
+   bank_0_oe <= not(a(15) or a(14));
+   bank_1_oe <= not(a(15)) and a(14);
+   bank_2_oe <= a(15) and not(a(14));
+   bank_3_oe <= a(15) and a(14);
    
    io_select: process (a, iorq) is
    begin
@@ -87,41 +111,7 @@ begin
          sel <= "00000000";
       end if;
    end process;
-   
-   bank_regs: process (sel, a(14), a(15), reset, d, wr) is
-   begin
-      if reset = '0' then
-         bank0 <= "00000000";
-         bank1 <= "00000000";
-         bank2 <= "00000000";
-         bank3 <= "00000000";
-      else 
-         if wr = '0' then
-            if sel(selection'pos(sel_bank0)) = '1' then
-               bank0 <= d;
-            elsif sel(selection'pos(sel_bank1)) = '1' then
-               bank1 <= d;
-            elsif sel(selection'pos(sel_bank2)) = '1' then
-               bank2 <= d;
-            elsif sel(selection'pos(sel_bank3)) = '1' then
-               bank3 <= d;
-            end if;
-         end if;
-      end if;
       
-      case a(15 downto 14) is
-         when "00" =>
-            bank_sig <= bank0;
-         when "01" =>
-            bank_sig <= bank1;
-         when "10" =>
-            bank_sig <= bank2;
-         when "11" =>
-            bank_sig <= bank2;
-         when others =>
-      end case;
-   end process;
-   
    ftdi: process (rd, mreq) is
    begin
       if (rd = '0' and mreq = '0') then
@@ -141,6 +131,7 @@ begin
    led_y <= a(1);
    led_r <= a(0);
    waitx <= wait_sig;
-   b <= bank_sig(4 downto 0);
+   b <= bank_sig3(4 downto 0) or bank_sig2(4 downto 0)
+      or bank_sig1(4 downto 0) or bank_sig0(4 downto 0);
 end behavioral;
 
