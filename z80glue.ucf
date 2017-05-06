@@ -59,7 +59,9 @@ NET "FTDI_RXF" LOC = "14";
 NET "FTDI_WR" LOC = "13";
 NET "FTDI_RD" LOC = "12";
 
-#NET "RAM_CE" LOC = "FB";
+NET "RAM_WE" LOC = "11";
+NET "RAM_OE" LOC = "10";
+NET "RAM_CE" LOC = "9";
 
 #NET "BELL" LOC = "FB";
 
