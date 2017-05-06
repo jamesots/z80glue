@@ -8,15 +8,15 @@ entity clk_div is
 end clk_div;
 
 architecture behavioral of clk_div is
-	signal clk_count : unsigned(0 to 1) := "00";
+   signal clk_count : unsigned(0 to 1) := "00";
 begin
-	clkdiv: process (clk16) is
-	begin
-		if rising_edge(clk16) then
-			clk_count <= clk_count + 1;
-		end if;
-	end process;
-	
-	clk4 <= clk_count(0);
+   clkdiv: process (clk16) is
+   begin
+      if rising_edge(clk16) then
+         clk_count <= clk_count + 1;
+      end if;
+   end process;
+   
+   clk4 <= clk_count(0);
 end behavioral;
 
