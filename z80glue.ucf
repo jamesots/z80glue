@@ -1,0 +1,74 @@
+NET "LED_G" LOC = "79";
+NET "LED_Y" LOC = "81";
+NET "LED_R" LOC = "85";
+NET "CLK16" LOC = "FB1_17"; # GCK1
+NET "CLK16" PERIOD = 16;
+
+NET "A(0)" LOC = "76";
+NET "A(1)" LOC = "73";
+NET "A(2)" LOC = "71";
+NET "A(3)" LOC = "68";
+NET "A(4)" LOC = "66";
+NET "A(5)" LOC = "64";
+NET "A(6)" LOC = "60";
+NET "A(7)" LOC = "56";
+NET "A(8)" LOC = "55";
+NET "A(9)" LOC = "53";
+NET "A(10)" LOC = "50";
+NET "A(11)" LOC = "46";
+NET "A(12)" LOC = "42";
+NET "A(13)" LOC = "40";
+NET "A(14)" LOC = "37";
+NET "A(15)" LOC = "35";
+
+#NET "B(14)" LOC = "59";
+#NET "B(15)" LOC = "61";
+#NET "B(16)" LOC = "63";
+#NET "B(17)" LOC = "65";
+#NET "B(18)" LOC = "67";
+
+NET "D(0)" LOC = "36";
+NET "D(1)" LOC = "39";
+NET "D(2)" LOC = "41";
+NET "D(3)" LOC = "43";
+NET "D(4)" LOC = "49";
+NET "D(5)" LOC = "52";
+NET "D(6)" LOC = "54";
+NET "D(7)" LOC = "56";
+
+NET "CLK4" LOC = "FB3_2"; # GCK2
+NET "CLK4" PERIOD = 4;
+
+NET "INT" LOC = "33";
+NET "NMI" LOC = "34";
+NET "HALT" LOC = "30";
+NET "MREQ" LOC = "32";
+NET "IORQ" LOC = "28";
+
+NET "RFSH" LOC = "29";
+NET "M1" LOC = "25";
+NET "RESET" LOC = "24";
+NET "BUSRQ" LOC = "19";
+NET "WAITX" LOC = "20";
+NET "BUSACK" LOC = "17";
+NET "WR" LOC = "18";
+NET "RD" LOC = "15";
+
+NET "FTDI_TXE" LOC = "16";
+NET "FTDI_RXF" LOC = "14";
+NET "FTDI_WR" LOC = "13";
+NET "FTDI_RD" LOC = "12";
+
+#NET "RAM_CE" LOC = "FB";
+
+#NET "BELL" LOC = "FB";
+
+#NET "SCR_RS" LOC = "FB";
+#NET "SCR_RW" LOC = "FB";
+#NET "SCR_E" LOC = "FB";
+#
+#NET "ROM_CE" LOC = "FB";
+#NET "ROM_OE" LOC = "FB";
+#NET "ROM_WE" LOC = "FB";
+#
+#NET "ROM_BOOT" LOC = "FB";
