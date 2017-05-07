@@ -12,27 +12,27 @@ architecture behavioral of decoder is
 begin
    process (i, oe) is
    begin
-		d <= "11111111";
+		d <= "00000000";
 		if oe = '0' then
 			case i is
 				when "000" =>
-					d(0) <= '0';
+					d(0) <= '1';
 				when "001" =>
-					d(1) <= '0';
+					d(1) <= '1';
 				when "010" =>
-					d(2) <= '0';
+					d(2) <= '1';
 				when "011" =>
-					d(3) <= '0';
+					d(3) <= '1';
 				when "100" =>
-					d(4) <= '0';
+					d(4) <= '1';
 				when "101" =>
-					d(5) <= '0';
+					d(5) <= '1';
 				when "110" =>
-					d(6) <= '0';
+					d(6) <= '1';
 				when "111" =>
-					d(7) <= '0';
+					d(7) <= '1';
 				when others =>
-					d <= "11111111";
+					d <= "00000000";
 			end case;
 		end if;
    end process;
