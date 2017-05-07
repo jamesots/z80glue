@@ -44,10 +44,11 @@ architecture behavioral of z80glue is
               clk4  : out std_logic);
    end component;
    component bank_register is
-       port ( d   : in  std_logic_vector(7 downto 0);
-              clk : in  std_logic;
-              oe  : in  std_logic;
-              b   : out std_logic_vector(7 downto 0));
+       port ( d     : in  std_logic_vector(7 downto 0);
+              clk   : in  std_logic;
+              oe    : in  std_logic;
+              b     : out std_logic_vector(7 downto 0);
+              reset : in  std_logic);
    end component;
 	component decoder is
 		 port ( i   : in  std_logic_vector(2 downto 0);
@@ -81,16 +82,15 @@ architecture behavioral of z80glue is
    signal bank_3_oe: std_logic;
 begin
    clk_div_i: clk_div port map (clk16, clk4);
-   bank_0: bank_register port map (d, sel(0), bank_0_oe, bank_sig0);
-   bank_1: bank_register port map (d, sel(1), bank_1_oe, bank_sig1);
-   bank_2: bank_register port map (d, sel(2), bank_2_oe, bank_sig2);
-   bank_3: bank_register port map (d, sel(3), bank_3_oe, bank_sig3);
-	
-   bank_0_oe <= not(a(15) or a(14));
-   bank_1_oe <= not(a(15)) and a(14);
-   bank_2_oe <= a(15) and not(a(14));
-   bank_3_oe <= a(15) and a(14);
-   -- there's no reset yet!
+   
+   bank_0: bank_register port map (d, sel(0), bank_0_oe, bank_sig0, reset);
+   bank_1: bank_register port map (d, sel(1), bank_1_oe, bank_sig1, reset);
+   bank_2: bank_register port map (d, sel(2), bank_2_oe, bank_sig2, reset);
+   bank_3: bank_register port map (d, sel(3), bank_3_oe, bank_sig3, reset);
+   bank_0_oe <= not(a(15)) or not(a(14));
+   bank_1_oe <= not(a(15)) or a(14);
+   bank_2_oe <= a(15) or not(a(14));
+   bank_3_oe <= a(15) or a(14);
 
 	decoder_i: decoder port map (a(2 downto 0), sel_oe, sel);
    sel_oe <= a(7) or a(6) or a(5) or a(4) or a(3);
@@ -114,8 +114,7 @@ begin
    led_y <= a(1);
    led_r <= a(0);
    waitx <= wait_sig;
-   bank_sig <= bank_sig3 or bank_sig2
-      or bank_sig1 or bank_sig0;
+   bank_sig <= bank_sig3 or bank_sig2 or bank_sig1 or bank_sig0;
 	b <= bank_sig(4 downto 0);
 end behavioral;
 

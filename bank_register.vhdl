@@ -11,9 +11,9 @@ entity bank_register is
 end bank_register;
 
 architecture behavioral of bank_register is
-   signal data : std_logic_vector(7 downto 0);
+   signal data : std_logic_vector(7 downto 0) := "11000000";
 begin
-   process (clk, d) is
+   process (clk, d, reset) is
    begin
 		if reset = '0' then
          data <= "11000000";
