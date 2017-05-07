@@ -19,7 +19,7 @@ begin
       end if;
    end process;
    
-   b <= data when oe = '1';
-   b <= "ZZZZZZZZ" when oe = '0';
+   b <= data when oe = '0';
+   b <= "ZZZZZZZZ" when oe = '1';
 end behavioral;
 

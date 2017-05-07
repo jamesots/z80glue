@@ -49,6 +49,11 @@ architecture behavioral of z80glue is
               oe  : in  std_logic;
               b   : out std_logic_vector(7 downto 0));
    end component;
+	component decoder is
+		 port ( i   : in  std_logic_vector(2 downto 0);
+				  oe  : in  std_logic;
+				  d   : out std_logic_vector(7 downto 0));
+	end component;
 
    signal wait_sig : std_logic;
    
@@ -57,13 +62,15 @@ architecture behavioral of z80glue is
    signal bank2 : std_logic_vector(7 downto 0);
    signal bank3 : std_logic_vector(7 downto 0);
    
+   signal bank_sig : std_logic_vector(7 downto 0);
    signal bank_sig0 : std_logic_vector(7 downto 0);
    signal bank_sig1 : std_logic_vector(7 downto 0);
    signal bank_sig2 : std_logic_vector(7 downto 0);
    signal bank_sig3 : std_logic_vector(7 downto 0);
    
    signal sel : std_logic_vector(7 downto 0);
-   
+   signal sel_oe : std_logic;
+	
    type selection is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
        sel_screen_rd, sel_screen_wr, sel_bell, sel_ftdi_status);       
@@ -78,43 +85,19 @@ begin
    bank_1: bank_register port map (d, sel(1), bank_1_oe, bank_sig1);
    bank_2: bank_register port map (d, sel(2), bank_2_oe, bank_sig2);
    bank_3: bank_register port map (d, sel(3), bank_3_oe, bank_sig3);
-            
+	
    bank_0_oe <= not(a(15) or a(14));
    bank_1_oe <= not(a(15)) and a(14);
    bank_2_oe <= a(15) and not(a(14));
    bank_3_oe <= a(15) and a(14);
-   
-   io_select: process (a, iorq) is
-   begin
-      if iorq = '0' then
-         case a(7 downto 0) is
-            when "00000000" =>
-               sel <= "00000001";
-            when "00000001" =>
-               sel <= "00000010";
-            when "00000010" =>
-               sel <= "00000100";
-            when "00000011" =>
-               sel <= "00001000";
-            when "00000100" =>
-               sel <= "00010000";
-            when "00000101" =>
-               sel <= "00100000";
-            when "00000110" =>
-               sel <= "01000000";
-            when "00000111" =>
-               sel <= "10000000";
-            when others =>
-               sel <= "00000000";
-         end case;
-      else
-         sel <= "00000000";
-      end if;
-   end process;
+   -- there's no reset yet!
+
+	decoder_i: decoder port map (a(2 downto 0), sel_oe, sel);
+   sel_oe <= a(7) or a(6) or a(5) or a(4) or a(3);
       
-   ftdi: process (rd, mreq) is
+   ftdi: process (rd, mreq, bank_sig) is
    begin
-      if (rd = '0' and mreq = '0') then
+      if (bank_sig(7 downto 4) = "1100" and rd = '0' and mreq = '0') then
          ftdi_rd <= '0';
          if ftdi_rxf = '1' then
             wait_sig <= '0';
@@ -131,7 +114,8 @@ begin
    led_y <= a(1);
    led_r <= a(0);
    waitx <= wait_sig;
-   b <= bank_sig3(4 downto 0) or bank_sig2(4 downto 0)
-      or bank_sig1(4 downto 0) or bank_sig0(4 downto 0);
+   bank_sig <= bank_sig3 or bank_sig2
+      or bank_sig1 or bank_sig0;
+	b <= bank_sig(4 downto 0);
 end behavioral;
 

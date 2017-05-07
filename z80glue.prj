@@ -1,3 +1,4 @@
+vhdl work "decoder.vhdl"
 vhdl work "clk_div.vhdl"
 vhdl work "bank_register.vhdl"
 vhdl work "z80glue.vhdl"
