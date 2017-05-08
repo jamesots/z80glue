@@ -3,34 +3,34 @@ use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.ALL;
 
 entity z80glue is
-    port ( clk16 : in    std_logic;
-           clk4  : out   std_logic;
-           led_r : out   std_logic;
-           led_g : out   std_logic;
-           led_y : out   std_logic;
-           a     : in    std_logic_vector(15 downto 0);
-           d     : inout std_logic_vector(7 downto 0);
-           b     : out   std_logic_vector(18 downto 14);
-           int     : out   std_logic;
-           nmi   : out   std_logic;
-           halt  : in    std_logic;
-           mreq  : in    std_logic;
-           iorq  : in    std_logic;
-           rfsh  : in    std_logic;
-           m1    : in    std_logic;
-           reset : in    std_logic;
-           busrq : out   std_logic;
-           waitx : out   std_logic;
-           busack : in   std_logic;
-           wr    : in    std_logic;
-           rd    : in    std_logic;
-           ftdi_txe : in std_logic;
-           ftdi_rxf : in std_logic;
-           ftdi_wr : out std_logic;
-           ftdi_rd : out std_logic;
-           ram_we : out  std_logic;
-           ram_oe : out  std_logic;
-           ram_ce : out  std_logic);
+    port ( clk16  : in    std_logic;
+           clk4   : out   std_logic;
+           led_r  : out   std_logic;
+           led_g  : out   std_logic;
+           led_y  : out   std_logic;
+           a      : in    std_logic_vector(15 downto 0);
+           d      : inout std_logic_vector(7 downto 0);
+           b      : out   std_logic_vector(18 downto 14);
+           int_n  : out   std_logic;
+           nmi_n  : out   std_logic;
+           halt_n : in    std_logic;
+           mreq_n : in    std_logic;
+           iorq_n : in    std_logic;
+           rfsh_n : in    std_logic;
+           m1_n   : in    std_logic;
+           reset_n : in    std_logic;
+           busrq_n : out   std_logic;
+           wait_n : out   std_logic;
+           busack_n : in   std_logic;
+           wr_n    : in    std_logic;
+           rd_n    : in    std_logic;
+           ftdi_txe_n : in std_logic;
+           ftdi_rxf_n : in std_logic;
+           ftdi_wr_n : out std_logic;
+           ftdi_rd_n : out std_logic;
+           ram_we_n : out  std_logic;
+           ram_oe_n : out  std_logic;
+           ram_ce_n : out  std_logic);
 end z80glue;
 
 architecture behavioral of z80glue is
@@ -58,60 +58,60 @@ architecture behavioral of z80glue is
              banks : out std_logic_vector(7 downto 0));
    end component;
 
-   signal wait_sig : std_logic;
+   signal wait_n_i : std_logic;
    
    signal bank0 : std_logic_vector(7 downto 0);
    signal bank1 : std_logic_vector(7 downto 0);
    signal bank2 : std_logic_vector(7 downto 0);
    signal bank3 : std_logic_vector(7 downto 0);
    
-   signal bank_sig : std_logic_vector(7 downto 0);
+   signal bank_i : std_logic_vector(7 downto 0);
    
    signal sel : std_logic_vector(7 downto 0);
    signal sel_oe : std_logic;
    
-   signal mem_rd : std_logic;
+   signal mem_rd_n : std_logic;
    signal ftdi_rd_i : std_logic;
 	
    type selection is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
        sel_screen_rd, sel_screen_wr, sel_bell, sel_ftdi_status);       
        
-   signal ram_sel : std_logic;
-   signal rom_sel : std_logic;
-   signal ftdi_sel : std_logic;
+   signal ram_sel_n : std_logic;
+   signal rom_sel_n : std_logic;
+   signal ftdi_sel_n : std_logic;
 begin
    clk_div_i: clk_div port map (clk16, clk4);
    
-   bank_multi: bank_multiplex port map (a(15 downto 14), bank0, bank1, bank2, bank3, bank_sig);
+   bank_multi: bank_multiplex port map (a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
    
-   bank_0: bank_register port map (d, sel(0), bank0, reset);
-   bank_1: bank_register port map (d, sel(1), bank1, reset);
-   bank_2: bank_register port map (d, sel(2), bank2, reset);
-   bank_3: bank_register port map (d, sel(3), bank3, reset);
+   bank_0: bank_register port map (d, sel(0), bank0, reset_n);
+   bank_1: bank_register port map (d, sel(1), bank1, reset_n);
+   bank_2: bank_register port map (d, sel(2), bank2, reset_n);
+   bank_3: bank_register port map (d, sel(3), bank3, reset_n);
 
 	decoder_i: decoder port map (a(2 downto 0), sel_oe, sel);
    sel_oe <= a(7) or a(6) or a(5) or a(4) or a(3);
    
-   ftdi_sel <= not(bank_sig(7)) or not(bank_sig(6));  -- ftdi = 11xxxxxx
-   ram_sel <= bank_sig(7);                            -- ram  = 0xxxxxxx
-   rom_sel <= not(bank_sig(7)) or bank_sig(6);        -- rom  = 10xxxxxx
+   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));  -- ftdi = 11xxxxxx
+   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
+   rom_sel_n <= not(bank_i(7)) or bank_i(6);        -- rom  = 10xxxxxx
    
-   mem_rd <= rd or mreq;
+   mem_rd_n <= rd_n or mreq_n;
    -- read from ftdi when rd and mreq are low, and bank_sig(7:4) = "1100"
-   ftdi_rd_i <= mem_rd or ftdi_sel;
-   wait_sig <= ftdi_rd_i or not(ftdi_rxf);
-   ftdi_rd <= ftdi_rd_i;
+   ftdi_rd_i <= mem_rd_n or ftdi_sel_n;
+   wait_n_i <= ftdi_rd_i or not(ftdi_rxf_n);
+   ftdi_rd_n <= ftdi_rd_i;
    
-   ram_ce <= ram_sel;
-   ram_we <= wr or mreq;
-   ram_oe <= mem_rd;
+   ram_ce_n <= ram_sel_n;
+   ram_we_n <= wr_n or mreq_n;
+   ram_oe_n <= mem_rd_n;
    
-   led_g <= wait_sig;
+   led_g <= wait_n_i;
    led_y <= a(1);
    led_r <= a(0);
-   waitx <= wait_sig;
-	b <= bank_sig(4 downto 0);
+   wait_n <= wait_n_i;
+	b <= bank_i(4 downto 0);
    
    d <= "ZZZZZZZZ";
 end behavioral;

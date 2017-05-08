@@ -39,29 +39,29 @@ NET "D(7)" LOC = "56";
 NET "CLK4" LOC = "FB3_2"; # GCK2
 NET "CLK4" PERIOD = 4;
 
-NET "INT" LOC = "33";
-NET "NMI" LOC = "34";
-NET "HALT" LOC = "30";
-NET "MREQ" LOC = "32";
-NET "IORQ" LOC = "28";
+NET "INT_N" LOC = "33";
+NET "NMI_N" LOC = "34";
+NET "HALT_N" LOC = "30";
+NET "MREQ_N" LOC = "32";
+NET "IORQ_N" LOC = "28";
 
-NET "RFSH" LOC = "29";
-NET "M1" LOC = "25";
-NET "RESET" LOC = "24";
-NET "BUSRQ" LOC = "19";
-NET "WAITX" LOC = "20";
-NET "BUSACK" LOC = "17";
-NET "WR" LOC = "18";
-NET "RD" LOC = "15";
+NET "RFSH_N" LOC = "29";
+NET "M1_N" LOC = "25";
+NET "RESET_N" LOC = "24";
+NET "BUSRQ_N" LOC = "19";
+NET "WAIT_N" LOC = "20";
+NET "BUSACK_N" LOC = "17";
+NET "WR_N" LOC = "18";
+NET "RD_N" LOC = "15";
 
-NET "FTDI_TXE" LOC = "16";
-NET "FTDI_RXF" LOC = "14";
-NET "FTDI_WR" LOC = "13";
-NET "FTDI_RD" LOC = "12";
+NET "FTDI_TXE_N" LOC = "16";
+NET "FTDI_RXF_N" LOC = "14";
+NET "FTDI_WR_N" LOC = "13";
+NET "FTDI_RD_N" LOC = "12";
 
-NET "RAM_WE" LOC = "11";
-NET "RAM_OE" LOC = "10";
-NET "RAM_CE" LOC = "9";
+NET "RAM_WE_N" LOC = "11";
+NET "RAM_OE_N" LOC = "10";
+NET "RAM_CE_N" LOC = "9";
 
 #NET "BELL" LOC = "FB";
 
