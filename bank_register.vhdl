@@ -14,7 +14,7 @@ architecture behavioral of bank_register is
 begin
    process (clk, reset) is
    begin
-		if reset = '0' then
+		if reset = '1' then
          data <= "11000000";
 		else
 			if clk'event and clk = '1' then

@@ -72,6 +72,7 @@ architecture behavioral of z80glue is
    
    signal mem_rd_n : std_logic;
    signal ftdi_rd_i : std_logic;
+   signal reset : std_logic;
 	
    type selection is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
@@ -85,20 +86,21 @@ begin
    
    bank_multi: bank_multiplex port map (a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
    
-   bank_0: bank_register port map (d, sel(0), bank0, reset_n);
-   bank_1: bank_register port map (d, sel(1), bank1, reset_n);
-   bank_2: bank_register port map (d, sel(2), bank2, reset_n);
-   bank_3: bank_register port map (d, sel(3), bank3, reset_n);
+   bank_0: bank_register port map (d, sel(0), bank0, reset);
+   bank_1: bank_register port map (d, sel(1), bank1, reset);
+   bank_2: bank_register port map (d, sel(2), bank2, reset);
+   bank_3: bank_register port map (d, sel(3), bank3, reset);
 
 	decoder_i: decoder port map (a(2 downto 0), sel_oe, sel);
-   sel_oe <= a(7) or a(6) or a(5) or a(4) or a(3);
+   sel_oe <= not(a(7) or a(6) or a(5) or a(4) or a(3));
    
-   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));  -- ftdi = 11xxxxxx
+   reset <= not(reset_n);
+   
+   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
    ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
-   rom_sel_n <= not(bank_i(7)) or bank_i(6);        -- rom  = 10xxxxxx
+   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
    
    mem_rd_n <= rd_n or mreq_n;
-   -- read from ftdi when rd and mreq are low, and bank_sig(7:4) = "1100"
    ftdi_rd_i <= mem_rd_n or ftdi_sel_n;
    wait_n_i <= ftdi_rd_i or not(ftdi_rxf_n);
    ftdi_rd_n <= ftdi_rd_i;

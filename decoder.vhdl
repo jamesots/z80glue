@@ -13,7 +13,7 @@ begin
    process (i, oe) is
    begin
 		d <= "00000000";
-		if oe = '0' then
+		if oe = '1' then
 			case i is
 				when "000" =>
 					d(0) <= '1';
