@@ -71,10 +71,15 @@ architecture behavioral of z80glue is
    signal sel_oe : std_logic;
    
    signal mem_rd : std_logic;
+   signal ftdi_rd_i : std_logic;
 	
    type selection is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
        sel_screen_rd, sel_screen_wr, sel_bell, sel_ftdi_status);       
+       
+   signal ram_sel : std_logic;
+   signal rom_sel : std_logic;
+   signal ftdi_sel : std_logic;
 begin
    clk_div_i: clk_div port map (clk16, clk4);
    
@@ -87,32 +92,27 @@ begin
 
 	decoder_i: decoder port map (a(2 downto 0), sel_oe, sel);
    sel_oe <= a(7) or a(6) or a(5) or a(4) or a(3);
-      
---   ftdi: process (rd, mreq, bank_sig) is
---   begin
-----      if (bank_sig(7 downto 4) = "1100" and rd = '0' and mreq = '0') then
---      if (rd = '0' and mreq = '0') then
---         ftdi_rd <= '0';
---         if ftdi_rxf = '1' then
---            wait_sig <= '0';
---         else
---            wait_sig <= '1';
---         end if;
---      else
---         ftdi_rd <= '1';
---         wait_sig <= '1';
---      end if;
---   end process;
+   
+   ftdi_sel <= not(bank_sig(7)) or not(bank_sig(6));  -- ftdi = 11xxxxxx
+   ram_sel <= bank_sig(7);                            -- ram  = 0xxxxxxx
+   rom_sel <= not(bank_sig(7)) or bank_sig(6);        -- rom  = 10xxxxxx
    
    mem_rd <= rd or mreq;
+   -- read from ftdi when rd and mreq are low, and bank_sig(7:4) = "1100"
+   ftdi_rd_i <= mem_rd or ftdi_sel;
+   wait_sig <= ftdi_rd_i or not(ftdi_rxf);
+   ftdi_rd <= ftdi_rd_i;
    
-   wait_sig <= mem_rd or not(ftdi_rxf);
-   ftdi_rd <= mem_rd;
+   ram_ce <= ram_sel;
+   ram_we <= wr or mreq;
+   ram_oe <= mem_rd;
    
    led_g <= wait_sig;
    led_y <= a(1);
    led_r <= a(0);
    waitx <= wait_sig;
 	b <= bank_sig(4 downto 0);
+   
+   d <= "ZZZZZZZZ";
 end behavioral;
 
