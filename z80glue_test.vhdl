@@ -57,10 +57,10 @@ architecture behavior of z80glue_test is
    signal ftdi_txe : std_logic := '0';
    signal ftdi_rxf : std_logic := '0';
 
-	--BiDirs
+   --BiDirs
    signal d : std_logic_vector(7 downto 0);
 
- 	--Outputs
+   --Outputs
    signal clk4 : std_logic;
    signal led_r : std_logic;
    signal led_g : std_logic;
@@ -81,7 +81,7 @@ architecture behavior of z80glue_test is
  
 begin
  
-	-- Instantiate the Unit Under Test (UUT)
+   -- Instantiate the Unit Under Test (UUT)
    uut: z80glue port map (
           clk16 => clk16,
           clk4 => clk4,
@@ -116,18 +116,18 @@ begin
    -- Clock process definitions
    clk16_process :process
    begin
-		clk16 <= '0';
-		wait for clk16_period/2;
-		clk16 <= '1';
-		wait for clk16_period/2;
+      clk16 <= '0';
+      wait for clk16_period/2;
+      clk16 <= '1';
+      wait for clk16_period/2;
    end process;
  
    -- Stimulus process
    stim_proc: process
-   begin		
+   begin
       -- hold reset state for 100 ns.
       reset <= '0';
-      wait for 100 ns;	
+      wait for 100 ns;
       
       reset <= '1';
 
