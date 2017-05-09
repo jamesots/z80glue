@@ -50,7 +50,8 @@ architecture behavioral of z80glue is
 				  d   : out std_logic_vector(7 downto 0));
 	end component;
    component bank_multiplex is
-      port ( sel   : in  std_logic_vector(1 downto 0);
+      port ( clk   : in  std_logic;
+             sel   : in  std_logic_vector(1 downto 0);
              bank0 : in  std_logic_vector(7 downto 0);
              bank1 : in  std_logic_vector(7 downto 0);
              bank2 : in  std_logic_vector(7 downto 0);
@@ -81,10 +82,13 @@ architecture behavioral of z80glue is
    signal ram_sel_n : std_logic;
    signal rom_sel_n : std_logic;
    signal ftdi_sel_n : std_logic;
-begin
-   clk_div_i: clk_div port map (clk16, clk4);
    
-   bank_multi: bank_multiplex port map (a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
+   signal clk4_i : std_logic;
+begin
+   clk_div_i: clk_div port map (clk16, clk4_i);
+   clk4 <= clk4_i;
+   
+   bank_multi: bank_multiplex port map (clk4_i, a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
    
    bank_0: bank_register port map (d, sel(0), bank0, reset);
    bank_1: bank_register port map (d, sel(1), bank1, reset);
@@ -100,10 +104,10 @@ begin
    ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
    rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
    
-   mem_rd_n <= rd_n or mreq_n;
    ftdi_rd_i <= mem_rd_n or ftdi_sel_n;
    wait_n_i <= ftdi_rd_i or not(ftdi_rxf_n);
    ftdi_rd_n <= ftdi_rd_i;
+   mem_rd_n <= rd_n or mreq_n;
    
    ram_ce_n <= ram_sel_n;
    ram_we_n <= wr_n or mreq_n;

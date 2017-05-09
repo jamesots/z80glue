@@ -12,7 +12,6 @@ architecture behavioral of decoder is
 begin
    process (i, oe) is
    begin
-		d <= "00000000";
 		if oe = '1' then
 			case i is
 				when "000" =>
@@ -34,6 +33,8 @@ begin
 				when others =>
 					d <= "00000000";
 			end case;
+      else
+         d <= "00000000";
 		end if;
    end process;
 end behavioral;
