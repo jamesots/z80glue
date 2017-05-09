@@ -9,17 +9,17 @@ architecture behavior of decoder_test is
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-	component decoder is
-		 port ( i   : in  std_logic_vector(2 downto 0);
-				  oe  : in  std_logic;
-				  d   : out std_logic_vector(7 downto 0));
+   component decoder is
+       port ( i   : in  std_logic_vector(2 downto 0);
+              oe  : in  std_logic;
+              d   : out std_logic_vector(7 downto 0));
    end component;
     
    --Inputs
    signal i : std_logic_vector(2 downto 0) := (others => '0');
    signal oe : std_logic := '0';
 
- 	--Outputs
+    --Outputs
    signal d : std_logic_vector(7 downto 0);
    -- No clocks detected in port list. Replace <clock> below with 
    -- appropriate port name 
@@ -30,7 +30,7 @@ architecture behavior of decoder_test is
  
 begin
  
-	-- Instantiate the Unit Under Test (UUT)
+   -- Instantiate the Unit Under Test (UUT)
    uut: decoder port map (
           i => i,
           oe => oe,
@@ -40,18 +40,18 @@ begin
    -- Clock process definitions
    clock_process :process
    begin
-		clock <= '0';
-		wait for clock_period/2;
-		clock <= '1';
-		wait for clock_period/2;
+      clock <= '0';
+      wait for clock_period/2;
+      clock <= '1';
+      wait for clock_period/2;
    end process;
  
 
    -- Stimulus process
    stim_proc: process
-   begin		
+   begin      
       -- hold reset state for 100 ns.
-      wait for 100 ns;	
+      wait for 100 ns;   
 
       oe <= '0';
       i <= "000";

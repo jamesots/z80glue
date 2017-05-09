@@ -22,7 +22,7 @@ architecture behavior of bank_register_test is
    signal oe : std_logic := '0';
    signal reset : std_logic := '0';
 
- 	--Outputs
+    --Outputs
    signal b : std_logic_vector(7 downto 0);
 
    -- Clock period definitions
@@ -30,7 +30,7 @@ architecture behavior of bank_register_test is
  
 begin
  
-	-- Instantiate the Unit Under Test (UUT)
+   -- Instantiate the Unit Under Test (UUT)
    uut: bank_register port map (
           d => d,
           clk => clk,
@@ -42,16 +42,16 @@ begin
    -- Clock process definitions
    clk_process :process
    begin
-		clk <= '0';
-		wait for clk_period/2;
-		clk <= '1';
-		wait for clk_period/2;
+      clk <= '0';
+      wait for clk_period/2;
+      clk <= '1';
+      wait for clk_period/2;
    end process;
  
 
    -- Stimulus process
    stim_proc: process
-   begin		
+   begin      
       reset <= '1';
       oe <= '1';
 
