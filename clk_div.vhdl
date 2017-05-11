@@ -8,7 +8,8 @@ entity clk_div is
 end clk_div;
 
 architecture behavioral of clk_div is
-   signal clk_count : unsigned(0 to 18) := "0000000000000000000";
+--   signal clk_count : unsigned(0 to 22) := "00000000000000000000000";
+   signal clk_count : unsigned(0 to 2) := "000";
 begin
    clkdiv: process (clk16) is
    begin

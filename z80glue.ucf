@@ -1,6 +1,12 @@
-NET "LED_G" LOC = "79";
-NET "LED_Y" LOC = "81";
-NET "LED_R" LOC = "85";
+NET "LED(0)" LOC = "86";
+NET "LED(1)" LOC = "85";
+NET "LED(2)" LOC = "81";
+NET "LED(3)" LOC = "79";
+NET "LED(4)" LOC = "77";
+NET "LED(5)" LOC = "74";
+NET "LED(6)" LOC = "72";
+NET "LED(7)" LOC = "70";
+
 NET "CLK16" LOC = "FB1_17"; # GCK1
 NET "CLK16" PERIOD = 16;
 
@@ -47,7 +53,7 @@ NET "IORQ_N" LOC = "28";
 
 NET "RFSH_N" LOC = "29";
 NET "M1_N" LOC = "25";
-NET "RESET_N" LOC = "24";
+NET "RESET_OUT_N" LOC = "24";
 NET "BUSRQ_N" LOC = "19";
 NET "WAIT_N" LOC = "20";
 NET "BUSACK_N" LOC = "17";
@@ -63,14 +69,17 @@ NET "RAM_WE_N" LOC = "11";
 NET "RAM_OE_N" LOC = "10";
 NET "RAM_CE_N" LOC = "9";
 
+NET "RESET_IN_N" LOC = "8";
+
+NET "ROM_WE_N" LOC = "78";
+NET "ROM_OE_N" LOC = "80";
+NET "ROM_CE_N" LOC = "82";
+
 #NET "BELL" LOC = "FB";
 
 #NET "SCR_RS" LOC = "FB";
 #NET "SCR_RW" LOC = "FB";
 #NET "SCR_E" LOC = "FB";
 #
-#NET "ROM_CE" LOC = "FB";
-#NET "ROM_OE" LOC = "FB";
-#NET "ROM_WE" LOC = "FB";
 #
 #NET "ROM_BOOT" LOC = "FB";
