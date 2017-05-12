@@ -27,6 +27,7 @@ entity z80glue is
            ftdi_rxf_n : in    std_logic;
            ftdi_wr_n  : out   std_logic;
            ftdi_rd_n  : out   std_logic;
+           bell       : out   std_logic;
            ram_we_n   : out   std_logic;
            ram_oe_n   : out   std_logic;
            ram_ce_n   : out   std_logic;
@@ -65,6 +66,13 @@ architecture behavioral of z80glue is
              reset_in_n  : in   std_logic;
              reset_out_n : out  std_logic);
    end component;
+   component bell_latch is
+      port ( wr    : in   std_logic;
+             state : in   std_logic;
+             reset : in   std_logic;
+             bells : out  std_logic);
+   end component;
+
 
    signal wait_n_i : std_logic;
    
@@ -79,7 +87,11 @@ architecture behavioral of z80glue is
    signal sel_oe : std_logic;
    
    signal mem_rd_n  : std_logic;
-   signal ftdi_rd_i : std_logic;
+   signal mem_wr_n  : std_logic;
+   
+   signal ftdi_rd_n_i : std_logic;
+   signal ftdi_wr_n_i : std_logic;
+   
    signal reset_i   : std_logic;
    signal long_reset_n_i : std_logic;
 
@@ -91,6 +103,8 @@ architecture behavioral of z80glue is
    signal rom_sel_n  : std_logic;
    signal ftdi_sel_n : std_logic;
    
+   signal bell_sel : std_logic;
+   
    signal clk4_i : std_logic;
 begin
    clk_div_c: clk_div port map (clk16, clk4_i);
@@ -98,6 +112,9 @@ begin
    
    reset_c: reset port map (clk4_i, reset_in_n, long_reset_n_i);
    
+   bell_sel <= not(wr_n) and sel(6);
+   bell_latch_c: bell_latch port map (bell_sel, d(0), reset_i, bell);
+
    bank_multiplex_c: bank_multiplex port map (clk4_i, a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
    
    bank_0: bank_register port map (d, sel(0), bank0, reset_i);
@@ -111,20 +128,28 @@ begin
    reset_i <= not(long_reset_n_i);
    reset_out_n <= long_reset_n_i;
    
-   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
-   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
-   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
---   ftdi_sel_n <= '0';
---   ram_sel_n <= '1';
---   rom_sel_n <= '1';
+--   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
+--   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
+--   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
+   ftdi_sel_n <= '0';
+   ram_sel_n <= '1';
+   rom_sel_n <= '1';
    
-   ftdi_rd_i <= mem_rd_n or ftdi_sel_n;
-   wait_n_i <= ftdi_rd_i or not(ftdi_rxf_n);
-   ftdi_rd_n <= ftdi_rd_i;
    mem_rd_n <= rd_n or mreq_n;
+   mem_wr_n <= wr_n or mreq_n;
    
+--   ftdi_wr_n_i <= mem_wr_n or ftdi_sel_n;
+--   ftdi_wr_n <= ftdi_wr_n_i;
+   ftdi_wr_n <= '1';
+
+   ftdi_rd_n_i <= mem_rd_n or ftdi_sel_n;
+   ftdi_rd_n <= ftdi_rd_n_i;
+
+   wait_n_i <= (ftdi_rd_n_i or not(ftdi_rxf_n));
+--      or (ftdi_wr_n_i or not(ftdi_txe_n));
+
    ram_ce_n <= ram_sel_n;
-   ram_we_n <= wr_n or mreq_n;
+   ram_we_n <= mem_wr_n;
    ram_oe_n <= mem_rd_n;
    
    rom_ce_n <= '1';
@@ -136,7 +161,7 @@ begin
    led(2) <= a(0);
    led(3) <= ftdi_sel_n;
    led(4) <= ftdi_rxf_n;
-   led(5) <= ftdi_rd_i;
+   led(5) <= ftdi_rd_n_i;
    led(6) <= long_reset_n_i;
    led(7) <= clk4_i;
    

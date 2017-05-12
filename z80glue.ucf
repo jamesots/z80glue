@@ -75,7 +75,7 @@ NET "ROM_WE_N" LOC = "78";
 NET "ROM_OE_N" LOC = "80";
 NET "ROM_CE_N" LOC = "82";
 
-#NET "BELL" LOC = "FB";
+NET "BELL" LOC = "7";
 
 #NET "SCR_RS" LOC = "FB";
 #NET "SCR_RW" LOC = "FB";
