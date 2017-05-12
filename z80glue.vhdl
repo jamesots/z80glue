@@ -106,17 +106,17 @@ begin
    bank_3: bank_register port map (d, sel(3), bank3, reset_i);
 
    decoder_c: decoder port map (a(2 downto 0), sel_oe, sel);
-   sel_oe <= not(a(7) or a(6) or a(5) or a(4) or a(3));
+   sel_oe <= not(a(7) or a(6) or a(5) or a(4) or a(3)) or iorq_n;
    
    reset_i <= not(long_reset_n_i);
    reset_out_n <= long_reset_n_i;
    
---   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
---   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
---   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
-   ftdi_sel_n <= '0';
-   ram_sel_n <= '1';
-   rom_sel_n <= '1';
+   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
+   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
+   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
+--   ftdi_sel_n <= '0';
+--   ram_sel_n <= '1';
+--   rom_sel_n <= '1';
    
    ftdi_rd_i <= mem_rd_n or ftdi_sel_n;
    wait_n_i <= ftdi_rd_i or not(ftdi_rxf_n);
