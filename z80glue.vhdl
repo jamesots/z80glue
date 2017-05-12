@@ -128,12 +128,12 @@ begin
    reset_i <= not(long_reset_n_i);
    reset_out_n <= long_reset_n_i;
    
---   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
---   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
---   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
-   ftdi_sel_n <= '0';
-   ram_sel_n <= '1';
-   rom_sel_n <= '1';
+   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
+   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
+   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
+--   ftdi_sel_n <= '0';
+--   ram_sel_n <= '1';
+--   rom_sel_n <= '1';
    
    mem_rd_n <= rd_n or mreq_n;
    mem_wr_n <= wr_n or mreq_n;
