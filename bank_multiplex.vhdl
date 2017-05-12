@@ -13,22 +13,24 @@ entity bank_multiplex is
 end bank_multiplex;
 
 architecture behavioral of bank_multiplex is
-
+   signal bank_i: std_logic_vector(7 downto 0);
 begin
    process(sel, bank0, bank1, bank2, bank3) is
    begin
       case sel is
          when "00" =>
-            banks <= bank0;
+            bank_i <= bank0;
          when "01" =>
-            banks <= bank1;
+            bank_i <= bank1;
          when "10" =>
-            banks <= bank2;
+            bank_i <= bank2;
          when "11" =>
-            banks <= bank3;
+            bank_i <= bank3;
          when others =>
-            banks <= bank0;
+            bank_i <= bank0;
       end case;
    end process;
+   
+   banks <= bank_i;
 end behavioral;
 
