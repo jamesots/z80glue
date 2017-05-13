@@ -33,7 +33,10 @@ entity z80glue is
            ram_ce_n   : out   std_logic;
            rom_we_n   : out   std_logic;
            rom_oe_n   : out   std_logic;
-           rom_ce_n   : out   std_logic);
+           rom_ce_n   : out   std_logic;
+           scr_rs     : out   std_logic;
+           scr_rw     : out   std_logic;
+           scr_e_n     : out   std_logic);
 end z80glue;
 
 architecture behavioral of z80glue is
@@ -188,5 +191,9 @@ begin
    
    -- don't control the data bus
    d <= "ZZZZZZZZ";
+   
+   scr_rs <= '0';
+   scr_rw <= '0';
+   scr_e_n <= '1';
 end behavioral;
 

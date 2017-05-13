@@ -77,9 +77,9 @@ NET "ROM_CE_N" LOC = "82";
 
 NET "BELL" LOC = "7";
 
-#NET "SCR_RS" LOC = "FB";
-#NET "SCR_RW" LOC = "FB";
-#NET "SCR_E" LOC = "FB";
+NET "SCR_RS" LOC = "96";
+NET "SCR_RW" LOC = "94";
+NET "SCR_E_N" LOC = "92";
 #
 #
 #NET "ROM_BOOT" LOC = "FB";
