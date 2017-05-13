@@ -13,5 +13,5 @@ Naming conventions in VHDL.
 
 * _n is for active low
 * _i is for an internal signal version of a port 
-* _c is for cookie. I mean, component.
+* c_ is for cookie. I mean, component.
 * if it's active low and internal, the order is _n_i

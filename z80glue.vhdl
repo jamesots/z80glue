@@ -81,10 +81,15 @@ architecture behavioral of z80glue is
    signal bank2 : std_logic_vector(7 downto 0);
    signal bank3 : std_logic_vector(7 downto 0);
    
+   signal bank0_wr : std_logic;
+   signal bank1_wr : std_logic;
+   signal bank2_wr : std_logic;
+   signal bank3_wr : std_logic;
+   
    signal bank_i : std_logic_vector(7 downto 0);
    
    signal sel    : std_logic_vector(7 downto 0);
-   signal sel_oe : std_logic;
+   signal decoder_oe : std_logic;
    
    signal mem_rd_n  : std_logic;
    signal mem_wr_n  : std_logic;
@@ -109,28 +114,36 @@ architecture behavioral of z80glue is
 begin
    clk_div_c: clk_div port map (clk16, clk4_i);
    clk4 <= clk4_i;
-   
-   reset_c: reset port map (clk4_i, reset_in_n, long_reset_n_i);
-   
-   bell_sel <= not(wr_n) and sel(6);
-   bell_latch_c: bell_latch port map (bell_sel, d(0), reset_i, bell);
 
-   bank_multiplex_c: bank_multiplex port map (clk4_i, a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
-   
-   bank_0: bank_register port map (d, sel(0), bank0, reset_i);
-   bank_1: bank_register port map (d, sel(1), bank1, reset_i);
-   bank_2: bank_register port map (d, sel(2), bank2, reset_i);
-   bank_3: bank_register port map (d, sel(3), bank3, reset_i);
-
-   decoder_c: decoder port map (a(2 downto 0), sel_oe, sel);
-   sel_oe <= not(a(7) or a(6) or a(5) or a(4) or a(3)) or iorq_n;
-   
+   -- the reset component makes sure the reset pulse is at least 3 clocks long
+   c_reset: reset port map (clk4_i, reset_in_n, long_reset_n_i);
    reset_i <= not(long_reset_n_i);
    reset_out_n <= long_reset_n_i;
    
-   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6));    -- ftdi = 11xxxxxx
-   ram_sel_n <= bank_i(7);                            -- ram  = 0xxxxxxx
-   rom_sel_n <= not(bank_i(7)) or bank_i(6);          -- rom  = 10xxxxxx
+   -- decoder_oe enables the decoder output when an IO request is happening on 00000XXX.
+   decoder_oe <= not(a(7) or a(6) or a(5) or a(4) or a(3) or iorq_n);
+   c_decoder: decoder port map (a(2 downto 0), decoder_oe, sel);
+   
+   -- bankX_wr is high when trying to do an OUT to the bank's address
+   bank0_wr <= sel(0) and not(wr_n);
+   bank1_wr <= sel(1) and not(wr_n);
+   bank2_wr <= sel(2) and not(wr_n);
+   bank3_wr <= sel(3) and not(wr_n);
+   
+   bank_0: bank_register port map (d, bank0_wr, bank0, reset_i);
+   bank_1: bank_register port map (d, bank1_wr, bank1, reset_i);
+   bank_2: bank_register port map (d, bank2_wr, bank2, reset_i);
+   bank_3: bank_register port map (d, bank3_wr, bank3, reset_i);
+
+   -- bank_i should be set at all times, depending on what is on a14 and 15
+   c_bank_multiplex: bank_multiplex port map (clk4_i, a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
+   
+   bell_sel <= not(wr_n) and sel(6);
+   c_bell_latch: bell_latch port map (bell_sel, d(0), reset_i, bell);
+
+   ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6)) or mreq_n;     -- ftdi = 11xxxxxx
+   ram_sel_n <= bank_i(7) or mreq_n;                             -- ram  = 0xxxxxxx
+   rom_sel_n <= not(bank_i(7)) or bank_i(6) or mreq_n;           -- rom  = 10xxxxxx
 --   ftdi_sel_n <= '0';
 --   ram_sel_n <= '1';
 --   rom_sel_n <= '1';
@@ -142,12 +155,17 @@ begin
 --   ftdi_wr_n <= ftdi_wr_n_i;
    ftdi_wr_n <= '1';
 
-   ftdi_rd_n_i <= mem_rd_n or ftdi_sel_n;
+   -- try to read from the ftdi if we're doing a memory read and the ftdi is selected
+   ftdi_rd_n_i <= mreq_n or rd_n or ftdi_sel_n;
    ftdi_rd_n <= ftdi_rd_n_i;
 
+   -- ftdi_rxf_n is low when data is available
+   -- need to wait if we're reading from the ftdi but data is not available
    wait_n_i <= (ftdi_rd_n_i or not(ftdi_rxf_n));
 --      or (ftdi_wr_n_i or not(ftdi_txe_n));
 
+
+   -- enable the ram chip when ram is selected in the current bank
    ram_ce_n <= ram_sel_n;
    ram_we_n <= mem_wr_n;
    ram_oe_n <= mem_rd_n;
@@ -168,6 +186,7 @@ begin
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);
    
+   -- don't control the data bus
    d <= "ZZZZZZZZ";
 end behavioral;
 
