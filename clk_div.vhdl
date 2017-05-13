@@ -9,7 +9,9 @@ end clk_div;
 
 architecture behavioral of clk_div is
 --   signal clk_count : unsigned(0 to 22) := "00000000000000000000000";
-   signal clk_count : unsigned(0 to 3) := "0000";
+   -- 0 to 1 = 8MHz
+   -- 0 to 2 = 4MHz
+   signal clk_count : unsigned(0 to 1) := "00";
 begin
    clkdiv: process (clk16) is
    begin
