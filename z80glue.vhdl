@@ -75,7 +75,12 @@ architecture behavioral of z80glue is
              reset : in   std_logic;
              bells : out  std_logic);
    end component;
-
+   component screen_writer is
+      port ( clk    : in   std_logic;
+             sel    : in   std_logic;
+             e_n    : out  std_logic;
+             wait_n : out  std_logic);
+   end component;
 
    signal wait_n_i : std_logic;
    
@@ -105,7 +110,10 @@ architecture behavioral of z80glue is
 
    type selection is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
-       sel_screen_rd, sel_screen_wr, sel_bell, sel_ftdi_status);       
+       sel_screen_inst, sel_screen_data, sel_bell, sel_ftdi_status);       
+       
+   signal scr_sel    : std_logic;
+   signal scr_wait_n : std_logic;
        
    signal ram_sel_n  : std_logic;
    signal rom_sel_n  : std_logic;
@@ -143,6 +151,11 @@ begin
    
    bell_sel <= not(wr_n) and sel(6);
    c_bell_latch: bell_latch port map (bell_sel, d(0), reset_i, bell);
+   
+   scr_sel <= sel(4) or sel(5);
+   c_screen_writer: screen_writer port map (clk4_i, scr_sel, scr_e_n, scr_wait_n);
+   scr_rs <= a(0);
+   scr_rw <= wr_n;
 
    ftdi_sel_n <= not(bank_i(7)) or not(bank_i(6)) or mreq_n;     -- ftdi = 11xxxxxx
    ram_sel_n <= bank_i(7) or mreq_n;                             -- ram  = 0xxxxxxx
@@ -164,7 +177,8 @@ begin
 
    -- ftdi_rxf_n is low when data is available
    -- need to wait if we're reading from the ftdi but data is not available
-   wait_n_i <= (ftdi_rd_n_i or not(ftdi_rxf_n));
+   wait_n_i <= (ftdi_rd_n_i or not(ftdi_rxf_n))
+      or scr_wait_n;
 --      or (ftdi_wr_n_i or not(ftdi_txe_n));
 
 
@@ -191,9 +205,5 @@ begin
    
    -- don't control the data bus
    d <= "ZZZZZZZZ";
-   
-   scr_rs <= '0';
-   scr_rw <= '0';
-   scr_e_n <= '1';
 end behavioral;
 

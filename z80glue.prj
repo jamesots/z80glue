@@ -1,3 +1,4 @@
+vhdl work "screen_writer.vhdl"
 vhdl work "reset.vhdl"
 vhdl work "decoder.vhdl"
 vhdl work "clk_div.vhdl"
