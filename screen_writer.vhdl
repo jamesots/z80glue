@@ -10,21 +10,21 @@ entity screen_writer is
 end screen_writer;
 
 architecture behavioral of screen_writer is
-   signal count : integer range 0 to 6 := 0;
+   signal count : integer range 0 to 7 := 0;
 begin
    process (clk) is
    begin
       if clk'event and clk = '1' then
          if sel = '1' then
-            if count = 0 then
+            if count < 2 then
                e_n <= '0';
                wait_n <= '0';
                count <= count + 1;
-            elsif count = 1 then
+            elsif count < 3 then
                e_n <= '1';
                wait_n <= '0';
                count <= count + 1;
-            elsif count < 5 then
+            elsif count < 6 then
                e_n <= '1';
                wait_n <= '0';
                count <= count + 1;

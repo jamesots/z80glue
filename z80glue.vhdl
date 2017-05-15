@@ -178,7 +178,7 @@ begin
    -- ftdi_rxf_n is low when data is available
    -- need to wait if we're reading from the ftdi but data is not available
    wait_n_i <= (ftdi_rd_n_i or not(ftdi_rxf_n))
-      or scr_wait_n;
+      and scr_wait_n;
 --      or (ftdi_wr_n_i or not(ftdi_txe_n));
 
 
