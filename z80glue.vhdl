@@ -23,20 +23,31 @@ entity z80glue is
            busack_n   : in    std_logic;
            wr_n       : in    std_logic;
            rd_n       : in    std_logic;
+           
            ftdi_txe_n : in    std_logic;
            ftdi_rxf_n : in    std_logic;
            ftdi_wr_n  : out   std_logic;
            ftdi_rd_n  : out   std_logic;
+           
            bell       : out   std_logic;
+           
            ram_we_n   : out   std_logic;
            ram_oe_n   : out   std_logic;
            ram_ce_n   : out   std_logic;
+           
            rom_we_n   : out   std_logic;
            rom_oe_n   : out   std_logic;
            rom_ce_n   : out   std_logic;
+           
            scr_rs     : out   std_logic;
            scr_rw     : out   std_logic;
-           scr_e_n     : out   std_logic);
+           scr_e_n    : out   std_logic;
+           
+           sd_cd      : in    std_logic;
+           sd_cs_n    : out   std_logic;
+           sd_di      : out   std_logic;
+           sd_do      : in    std_logic;
+           sd_clk     : out   std_logic);
 end z80glue;
 
 architecture behavioral of z80glue is
@@ -110,7 +121,7 @@ architecture behavioral of z80glue is
 
    type selection is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
-       sel_screen_inst, sel_screen_data, sel_bell, sel_ftdi_status);       
+       sel_screen_inst, sel_screen_data, sel_bell, sel_sd);       
        
    signal scr_sel    : std_logic;
    signal scr_wait_n : std_logic;
@@ -192,16 +203,20 @@ begin
    rom_oe_n <= '1';
 
    led(0) <= wait_n_i;
-   led(1) <= a(1);
-   led(2) <= a(0);
-   led(3) <= ftdi_sel_n;
-   led(4) <= ftdi_rxf_n;
-   led(5) <= ftdi_rd_n_i;
+   led(1) <= a(0);
+   led(2) <= a(1);
+   led(3) <= a(2);
+   led(4) <= a(3);
+   led(5) <= sd_cd;
    led(6) <= long_reset_n_i;
    led(7) <= clk4_i;
    
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);
+
+   sd_cs_n <= '1';
+   sd_di <= '1';
+   sd_clk <= '0';
    
    -- don't control the data bus
    d <= "ZZZZZZZZ";

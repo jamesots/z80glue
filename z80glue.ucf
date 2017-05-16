@@ -80,6 +80,12 @@ NET "BELL" LOC = "7";
 NET "SCR_RS" LOC = "96";
 NET "SCR_RW" LOC = "94";
 NET "SCR_E_N" LOC = "92";
+
+NET "SD_CD" LOC = "93";
+NET "SD_CS_N" LOC = "91";
+NET "SD_DI" LOC = "89";
+NET "SD_DO" LOC = "87";
+NET "SD_CLK" LOC = "90";
 #
 #
 #NET "ROM_BOOT" LOC = "FB";
