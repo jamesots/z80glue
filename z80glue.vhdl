@@ -193,7 +193,7 @@ begin
    io_wr_n <= wr_n or iorq_n;
 
    -- only allow writing to the ftdi with OUT instructions - memory mapping is a hack for bootstrapping the computer
-   ftdi_wr_n_i <= not sel1(0);
+   ftdi_wr_n_i <= wr_n or not sel1(0);
    ftdi_wr_n <= ftdi_wr_n_i;
 
    -- try to read from the ftdi if we're doing a memory read and the ftdi is selected
