@@ -191,12 +191,11 @@ begin
    
    io_rd_n <= rd_n or iorq_n;
    io_wr_n <= wr_n or iorq_n;
-   
---   ftdi_wr_n_i <= mem_wr_n or ftdi_sel_n;
---   ftdi_wr_n <= ftdi_wr_n_i;
-   ftdi_wr_n <= '1';
 
---   rd_n or ((mreq_n or ftdi_sel_n) and not(sel1))
+   -- only allow writing to the ftdi with OUT instructions - memory mapping is a hack for bootstrapping the computer
+   ftdi_wr_n_i <= not sel1(0);
+   ftdi_wr_n <= ftdi_wr_n_i;
+
    -- try to read from the ftdi if we're doing a memory read and the ftdi is selected
    ftdi_rd_n_i <= rd_n or ((mreq_n or ftdi_sel_n)
       -- or we're doing an IO read on the ftdi port (port 8)
@@ -206,8 +205,10 @@ begin
    -- ftdi_rxf_n is low when data is available
    -- need to wait if we're reading from the ftdi but data is not available
    wait_n_i <= (ftdi_rd_n_i or not(ftdi_rxf_n))
+      -- or wait if we're writing to the ftdi but the buffer is full
+      and (ftdi_wr_n_i or not(ftdi_txe_n))
+      -- or wait if we're using the screen and it's not ready yet
       and scr_wait_n;
---      or (ftdi_wr_n_i or not(ftdi_txe_n));
 
 
    -- enable the ram chip when ram is selected in the current bank
