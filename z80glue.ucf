@@ -86,6 +86,9 @@ NET "SD_CS_N" LOC = "91";
 NET "SD_DI" LOC = "89";
 NET "SD_DO" LOC = "87";
 NET "SD_CLK" LOC = "90";
-#
-#
+
+NET "RTC_WE_N" LOC = "6";
+NET "RTC_OE_N" LOC = "97";
+NET "RTC_CE_N" LOC = "95";
+
 #NET "ROM_BOOT" LOC = "FB";
