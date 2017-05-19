@@ -144,6 +144,8 @@ architecture behavioral of z80glue is
    signal bell_sel : std_logic;
    
    signal clk4_i : std_logic;
+   
+   signal d_i : std_logic_vector(7 downto 0);
 begin
    clk_div_c: clk_div port map (clk16, clk4_i);
    clk4 <= clk4_i;
@@ -239,10 +241,15 @@ begin
    sd_cs_n <= '1';
    sd_di <= '1';
    sd_clk <= '0';
+
+   process (sel1, rd_n) is
+   begin
+      if sel1(1) = '1' and rd_n = '0' then
+         d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;
+      else
+         d_i <= "ZZZZZZZZ";
+      end if;
+   end process;
    
-   if sel1(1) = '1' and rd_n = '0' then
-      d <= "000000" & ftdi_txe_n & ftdi_rxf_n;
-   else
-      d <= "ZZZZZZZZ";
-   end if;
+   d <= d_i;
 end behavioral;
