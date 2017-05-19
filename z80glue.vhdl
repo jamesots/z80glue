@@ -240,7 +240,9 @@ begin
    sd_di <= '1';
    sd_clk <= '0';
    
-   -- don't control the data bus
-   d <= "ZZZZZZZZ";
+   if sel1(1) = '1' and rd_n = '0' then
+      d <= "000000" & ftdi_txe_n & ftdi_rxf_n;
+   else
+      d <= "ZZZZZZZZ";
+   end if;
 end behavioral;
-
