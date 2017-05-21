@@ -132,7 +132,7 @@ architecture behavioral of z80glue is
       (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
        sel_screen_inst, sel_screen_data, sel_bell, sel_sd);
    type selection1 is
-      (sel_ftdi_data, sel_ftdi_status, sel_rtc);
+      (sel_ftdi_data, sel_ftdi_status);
        
    signal scr_sel    : std_logic;
    signal scr_wait_n : std_logic;
@@ -140,6 +140,8 @@ architecture behavioral of z80glue is
    signal ram_sel_n  : std_logic;
    signal rom_sel_n  : std_logic;
    signal ftdi_sel_n : std_logic;
+   
+   signal rtc_sel : std_logic;
    
    signal bell_sel : std_logic;
    
@@ -222,7 +224,10 @@ begin
    rom_we_n <= mem_wr_n;
    rom_oe_n <= mem_rd_n;
 
-   rtc_ce_n <= not(sel1(2)) or iorq_n;
+   -- addresses 0x10 to 0x1F are the rtc
+   rtc_sel <= not(a(7)) and not(a(6)) and not(a(5)) and a(4) and not(iorq_n);
+
+   rtc_ce_n <= not(rtc_sel);
    rtc_we_n <= io_wr_n;
    rtc_oe_n <= io_rd_n;
 
