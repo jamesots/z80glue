@@ -225,7 +225,7 @@ begin
    rom_oe_n <= mem_rd_n;
 
    -- addresses 0x10 to 0x1F are the rtc
-   rtc_sel <= not(a(7)) and not(a(6)) and not(a(5)) and a(4) and not(iorq_n);
+   rtc_sel <= not(a(7)) and not(a(6)) and a(5) and not(a(4)) and not(iorq_n);
 
    rtc_ce_n <= not(rtc_sel);
    rtc_we_n <= io_wr_n;
