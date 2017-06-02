@@ -91,4 +91,4 @@ NET "RTC_WE_N" LOC = "6";
 NET "RTC_OE_N" LOC = "97";
 NET "RTC_CE_N" LOC = "95";
 
-#NET "ROM_BOOT" LOC = "FB";
+NET "ROM_BOOT_N" LOC = "3";  # GTS2

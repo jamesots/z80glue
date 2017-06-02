@@ -51,7 +51,9 @@ entity z80glue is
            sd_cs_n    : out   std_logic;
            sd_di      : out   std_logic;
            sd_do      : in    std_logic;
-           sd_clk     : out   std_logic);
+           sd_clk     : out   std_logic;
+           
+           rom_boot_n : in    std_logic);
 end z80glue;
 
 architecture behavioral of z80glue is
@@ -63,7 +65,8 @@ architecture behavioral of z80glue is
        port ( d     : in  std_logic_vector(7 downto 0);
               clk   : in  std_logic;
               b     : out std_logic_vector(7 downto 0);
-              reset : in  std_logic);
+              reset : in  std_logic;
+              rom_boot_n : in std_logic);
    end component;
       component decoder is
          port ( i   : in  std_logic_vector(2 downto 0);
@@ -170,10 +173,10 @@ begin
    bank2_wr <= sel0(2) and not(wr_n);
    bank3_wr <= sel0(3) and not(wr_n);
    
-   bank_0: bank_register port map (d, bank0_wr, bank0, reset_i);
-   bank_1: bank_register port map (d, bank1_wr, bank1, reset_i);
-   bank_2: bank_register port map (d, bank2_wr, bank2, reset_i);
-   bank_3: bank_register port map (d, bank3_wr, bank3, reset_i);
+   bank_0: bank_register port map (d, bank0_wr, bank0, reset_i, rom_boot_n);
+   bank_1: bank_register port map (d, bank1_wr, bank1, reset_i, rom_boot_n);
+   bank_2: bank_register port map (d, bank2_wr, bank2, reset_i, rom_boot_n);
+   bank_3: bank_register port map (d, bank3_wr, bank3, reset_i, rom_boot_n);
 
    -- bank_i should be set at all times, depending on what is on a14 and 15
    c_bank_multiplex: bank_multiplex port map (clk4_i, a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
