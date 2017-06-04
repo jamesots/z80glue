@@ -99,6 +99,11 @@ architecture behavioral of z80glue is
              e_n    : out  std_logic;
              wait_n : out  std_logic);
    end component;
+   component waiter is
+       port ( clk    :  in std_logic;
+              start  :  in std_logic;
+              wait_n : out std_logic);
+   end component;
 
    signal wait_n_i : std_logic;
    
@@ -143,6 +148,9 @@ architecture behavioral of z80glue is
    signal ram_sel_n  : std_logic;
    signal rom_sel_n  : std_logic;
    signal ftdi_sel_n : std_logic;
+   
+   signal rom_wait_start : std_logic;
+   signal rom_wait_n     : std_logic;
    
    signal rtc_sel : std_logic;
    
@@ -215,7 +223,8 @@ begin
       -- or wait if we're writing to the ftdi but the buffer is full
       and (ftdi_wr_n_i or not(ftdi_txe_n))
       -- or wait if we're using the screen and it's not ready yet
-      and scr_wait_n;
+      and scr_wait_n
+      and rom_wait_n;
 
 
    -- enable the ram chip when ram is selected in the current bank
@@ -224,8 +233,11 @@ begin
    ram_oe_n <= mem_rd_n;
    
    rom_ce_n <= rom_sel_n;
-   rom_we_n <= mem_wr_n;
-   rom_oe_n <= mem_rd_n;
+   rom_we_n <= mem_wr_n or rom_sel_n;
+   rom_oe_n <= mem_rd_n or rom_sel_n;
+
+   rom_wait_start <= not(rom_sel_n or (mem_rd_n and mem_wr_n));
+   rom_waiter: waiter port map (clk4_i, rom_wait_start, rom_wait_n);
 
    -- addresses 0x10 to 0x1F are the rtc
    rtc_sel <= not(a(7)) and not(a(6)) and a(5) and not(a(4)) and not(iorq_n);
