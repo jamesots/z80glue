@@ -243,8 +243,8 @@ begin
    rtc_sel <= not(a(7)) and not(a(6)) and a(5) and not(a(4)) and not(iorq_n);
 
    rtc_ce_n <= not(rtc_sel);
-   rtc_we_n <= io_wr_n;
-   rtc_oe_n <= io_rd_n;
+   rtc_we_n <= io_wr_n or not(rtc_sel);
+   rtc_oe_n <= io_rd_n or not(rtc_sel);
 
    led(0) <= wait_n_i;
    led(1) <= a(0);

@@ -1,141 +1,207 @@
-library ieee;
-use ieee.std_logic_1164.ALL;
-use ieee.numeric_std.ALL;
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
  
-entity z80glue_test is
-end z80glue_test;
+ENTITY z80glue_test IS
+END z80glue_test;
  
-architecture behavior of z80glue_test is
+ARCHITECTURE behavior OF z80glue_test IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
-    
-   component z80glue is
-       port ( clk16 : in    std_logic;
-              clk4  : out   std_logic;
-              led_r : out   std_logic;
-              led_g : out   std_logic;
-              led_y : out   std_logic;
-              a     : in    std_logic_vector(15 downto 0);
-              d     : inout std_logic_vector(7 downto 0);
-              b     : out   std_logic_vector(18 downto 14);
-              int     : out   std_logic;
-              nmi   : out   std_logic;
-              halt  : in    std_logic;
-              mreq  : in    std_logic;
-              iorq  : in    std_logic;
-              rfsh  : in    std_logic;
-              m1    : in    std_logic;
-              reset : in    std_logic;
-              busrq : out   std_logic;
-              waitx : out   std_logic;
-              busack : in   std_logic;
-              wr    : in    std_logic;
-              rd    : in    std_logic;
-              ftdi_txe : in std_logic;
-              ftdi_rxf : in std_logic;
-              ftdi_wr : out std_logic;
-              ftdi_rd : out std_logic;
-              ram_we : out  std_logic;
-              ram_oe : out  std_logic;
-              ram_ce : out  std_logic);
-   end component;
-
+ 
+    COMPONENT z80glue
+    PORT(
+         clk16 : IN  std_logic;
+         clk4 : OUT  std_logic;
+         led : OUT  std_logic_vector(7 downto 0);
+         a : IN  std_logic_vector(15 downto 0);
+         d : INOUT  std_logic_vector(7 downto 0);
+         b : OUT  std_logic_vector(18 downto 14);
+         int_n : OUT  std_logic;
+         nmi_n : OUT  std_logic;
+         halt_n : IN  std_logic;
+         mreq_n : IN  std_logic;
+         iorq_n : IN  std_logic;
+         rfsh_n : IN  std_logic;
+         m1_n : IN  std_logic;
+         reset_in_n : IN  std_logic;
+         reset_out_n : OUT  std_logic;
+         busrq_n : OUT  std_logic;
+         wait_n : OUT  std_logic;
+         busack_n : IN  std_logic;
+         wr_n : IN  std_logic;
+         rd_n : IN  std_logic;
+         ftdi_txe_n : IN  std_logic;
+         ftdi_rxf_n : IN  std_logic;
+         ftdi_wr_n : OUT  std_logic;
+         ftdi_rd_n : OUT  std_logic;
+         bell : OUT  std_logic;
+         ram_we_n : OUT  std_logic;
+         ram_oe_n : OUT  std_logic;
+         ram_ce_n : OUT  std_logic;
+         rom_we_n : OUT  std_logic;
+         rom_oe_n : OUT  std_logic;
+         rom_ce_n : OUT  std_logic;
+         rtc_we_n : OUT  std_logic;
+         rtc_oe_n : OUT  std_logic;
+         rtc_ce_n : OUT  std_logic;
+         scr_rs : OUT  std_logic;
+         scr_rw : OUT  std_logic;
+         scr_e_n : OUT  std_logic;
+         sd_cd : IN  std_logic;
+         sd_cs_n : OUT  std_logic;
+         sd_di : OUT  std_logic;
+         sd_do : IN  std_logic;
+         sd_clk : OUT  std_logic;
+         rom_boot_n : IN  std_logic
+        );
+    END COMPONENT;
     
 
    --Inputs
    signal clk16 : std_logic := '0';
    signal a : std_logic_vector(15 downto 0) := (others => '0');
-   signal halt : std_logic := '0';
-   signal mreq : std_logic := '0';
-   signal iorq : std_logic := '0';
-   signal rfsh : std_logic := '0';
-   signal m1 : std_logic := '0';
-   signal reset : std_logic := '0';
-   signal busack : std_logic := '0';
-   signal wr : std_logic := '0';
-   signal rd : std_logic := '0';
-   signal ftdi_txe : std_logic := '0';
-   signal ftdi_rxf : std_logic := '0';
+   signal halt_n : std_logic := '1';
+   signal mreq_n : std_logic := '1';
+   signal iorq_n : std_logic := '1';
+   signal rfsh_n : std_logic := '1';
+   signal m1_n : std_logic := '1';
+   signal reset_in_n : std_logic := '1';
+   signal busack_n : std_logic := '1';
+   signal wr_n : std_logic := '1';
+   signal rd_n : std_logic := '1';
+   signal ftdi_txe_n : std_logic := '1';
+   signal ftdi_rxf_n : std_logic := '1';
+   signal sd_cd : std_logic := '0';
+   signal sd_do : std_logic := '0';
+   signal rom_boot_n : std_logic := '1';
 
-   --BiDirs
+	--BiDirs
    signal d : std_logic_vector(7 downto 0);
 
-   --Outputs
+ 	--Outputs
    signal clk4 : std_logic;
-   signal led_r : std_logic;
-   signal led_g : std_logic;
-   signal led_y : std_logic;
+   signal led : std_logic_vector(7 downto 0);
    signal b : std_logic_vector(18 downto 14);
-   signal int : std_logic;
-   signal nmi : std_logic;
-   signal busrq : std_logic;
-   signal waitx : std_logic;
-   signal ftdi_wr : std_logic;
-   signal ftdi_rd : std_logic;
-   signal ram_we : std_logic;
-   signal ram_oe : std_logic;
-   signal ram_ce : std_logic;
+   signal int_n : std_logic;
+   signal nmi_n : std_logic;
+   signal reset_out_n : std_logic;
+   signal busrq_n : std_logic;
+   signal wait_n : std_logic;
+   signal ftdi_wr_n : std_logic;
+   signal ftdi_rd_n : std_logic;
+   signal bell : std_logic;
+   signal ram_we_n : std_logic;
+   signal ram_oe_n : std_logic;
+   signal ram_ce_n : std_logic;
+   signal rom_we_n : std_logic;
+   signal rom_oe_n : std_logic;
+   signal rom_ce_n : std_logic;
+   signal rtc_we_n : std_logic;
+   signal rtc_oe_n : std_logic;
+   signal rtc_ce_n : std_logic;
+   signal scr_rs : std_logic;
+   signal scr_rw : std_logic;
+   signal scr_e_n : std_logic;
+   signal sd_cs_n : std_logic;
+   signal sd_di : std_logic;
+   signal sd_clk : std_logic;
 
    -- Clock period definitions
    constant clk16_period : time := 10 ns;
+   constant clk4_period : time := 40 ns;
  
-begin
+BEGIN
  
-   -- Instantiate the Unit Under Test (UUT)
-   uut: z80glue port map (
+	-- Instantiate the Unit Under Test (UUT)
+   uut: z80glue PORT MAP (
           clk16 => clk16,
           clk4 => clk4,
-          led_r => led_r,
-          led_g => led_g,
-          led_y => led_y,
+          led => led,
           a => a,
           d => d,
           b => b,
-          int => int,
-          nmi => nmi,
-          halt => halt,
-          mreq => mreq,
-          iorq => iorq,
-          rfsh => rfsh,
-          m1 => m1,
-          reset => reset,
-          busrq => busrq,
-          waitx => waitx,
-          busack => busack,
-          wr => wr,
-          rd => rd,
-          ftdi_txe => ftdi_txe,
-          ftdi_rxf => ftdi_rxf,
-          ftdi_wr => ftdi_wr,
-          ftdi_rd => ftdi_rd,
-          ram_we => ram_we,
-          ram_oe => ram_oe,
-          ram_ce => ram_ce
+          int_n => int_n,
+          nmi_n => nmi_n,
+          halt_n => halt_n,
+          mreq_n => mreq_n,
+          iorq_n => iorq_n,
+          rfsh_n => rfsh_n,
+          m1_n => m1_n,
+          reset_in_n => reset_in_n,
+          reset_out_n => reset_out_n,
+          busrq_n => busrq_n,
+          wait_n => wait_n,
+          busack_n => busack_n,
+          wr_n => wr_n,
+          rd_n => rd_n,
+          ftdi_txe_n => ftdi_txe_n,
+          ftdi_rxf_n => ftdi_rxf_n,
+          ftdi_wr_n => ftdi_wr_n,
+          ftdi_rd_n => ftdi_rd_n,
+          bell => bell,
+          ram_we_n => ram_we_n,
+          ram_oe_n => ram_oe_n,
+          ram_ce_n => ram_ce_n,
+          rom_we_n => rom_we_n,
+          rom_oe_n => rom_oe_n,
+          rom_ce_n => rom_ce_n,
+          rtc_we_n => rtc_we_n,
+          rtc_oe_n => rtc_oe_n,
+          rtc_ce_n => rtc_ce_n,
+          scr_rs => scr_rs,
+          scr_rw => scr_rw,
+          scr_e_n => scr_e_n,
+          sd_cd => sd_cd,
+          sd_cs_n => sd_cs_n,
+          sd_di => sd_di,
+          sd_do => sd_do,
+          sd_clk => sd_clk,
+          rom_boot_n => rom_boot_n
         );
 
    -- Clock process definitions
    clk16_process :process
    begin
-      clk16 <= '0';
-      wait for clk16_period/2;
-      clk16 <= '1';
-      wait for clk16_period/2;
+		clk16 <= '0';
+		wait for clk16_period/2;
+		clk16 <= '1';
+		wait for clk16_period/2;
    end process;
  
+ 
+
    -- Stimulus process
    stim_proc: process
-   begin
+   begin		
       -- hold reset state for 100 ns.
-      reset <= '0';
-      wait for 100 ns;
-      
-      reset <= '1';
+      wait for 215 ns;	
 
-      wait for clk16_period*10;
+      iorq_n <= '0';
+      wr_n <= '0';
+      a <= "0000000000000010";
+      d <= "10000000";
+      
+      wait for clk4_period;
+      
+      iorq_n <= '1';
+      wr_n <= '1';
+      d <= "ZZZZZZZZ";
+      
+      wait for clk4_period;
+      
+      mreq_n <= '0';
+      a <= "1000000000000000";
+      rd_n <= '0';
+      
+      wait for clk4_period;
+      
+      mreq_n <= '1';
+      rd_n <= '1';
+      
 
       -- insert stimulus here 
 
       wait;
    end process;
 
-end;
+END;
