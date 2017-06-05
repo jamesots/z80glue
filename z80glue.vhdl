@@ -6,6 +6,8 @@ entity z80glue is
     port ( clk16      : in    std_logic;
            clk4       : out   std_logic;
            led        : out   std_logic_vector(7 downto 0);
+
+           -- Z80 signals
            a          : in    std_logic_vector(15 downto 0);
            d          : inout std_logic_vector(7 downto 0);
            b          : out   std_logic_vector(18 downto 14);
@@ -53,6 +55,7 @@ entity z80glue is
            sd_do      : in    std_logic;
            sd_clk     : out   std_logic;
            
+           -- set low to boot from the ROM, high to boot from the FT245
            rom_boot_n : in    std_logic);
 end z80glue;
 
@@ -238,7 +241,7 @@ begin
    rom_wait_start <= not(rom_sel_n or (mem_rd_n and mem_wr_n));
    rom_waiter: waiter port map (clk4_i, rom_wait_start, rom_wait_n);
 
-   -- addresses 0x10 to 0x1F are the rtc
+   -- addresses 0x20 to 0x2F are the rtc
    rtc_sel <= not(a(7)) and not(a(6)) and a(5) and not(a(4)) and not(iorq_n);
 
    rtc_ce_n <= not(rtc_sel);
