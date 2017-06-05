@@ -255,7 +255,7 @@ begin
    led(4) <= a(3);
    led(5) <= sd_cd;
    led(6) <= long_reset_n_i;
-   led(7) <= clk4_i;
+   led(7) <= '0';
    
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);

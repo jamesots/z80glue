@@ -8,7 +8,7 @@ NET "LED(6)" LOC = "72";
 NET "LED(7)" LOC = "70";
 
 NET "CLK16" LOC = "FB1_17"; # GCK1
-NET "CLK16" PERIOD = 16;
+NET "CLK16" PERIOD = 16 MHz;
 
 NET "A(0)" LOC = "76";
 NET "A(1)" LOC = "73";
@@ -42,8 +42,9 @@ NET "D(5)" LOC = "52";
 NET "D(6)" LOC = "54";
 NET "D(7)" LOC = "56";
 
+NET "CLK4" BUFG = CLK;
 NET "CLK4" LOC = "FB3_2"; # GCK2
-NET "CLK4" PERIOD = 4;
+NET "CLK4" PERIOD = 4 MHz;
 
 NET "INT_N" LOC = "33";
 NET "NMI_N" LOC = "34";
