@@ -12,7 +12,7 @@ end bell_latch;
 architecture behavioral of bell_latch is
    signal bell_i : std_logic := '0';
 begin
-   process (wr, reset) is
+   process (wr, reset, state) is
    begin
       if reset = '1' then
          bell_i <= '0';

@@ -3,8 +3,7 @@ use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.ALL;
 
 entity bank_multiplex is
-   port ( clk   : in  std_logic;
-          sel   : in  std_logic_vector(1 downto 0);
+   port ( sel   : in  std_logic_vector(1 downto 0);
           bank0 : in  std_logic_vector(7 downto 0);
           bank1 : in  std_logic_vector(7 downto 0);
           bank2 : in  std_logic_vector(7 downto 0);

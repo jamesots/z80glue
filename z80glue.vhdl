@@ -74,8 +74,7 @@ architecture behavioral of z80glue is
                 d   : out std_logic_vector(7 downto 0));
    end component;
    component bank_multiplex is
-      port ( clk   : in  std_logic;
-             sel   : in  std_logic_vector(1 downto 0);
+      port ( sel   : in  std_logic_vector(1 downto 0);
              bank0 : in  std_logic_vector(7 downto 0);
              bank1 : in  std_logic_vector(7 downto 0);
              bank2 : in  std_logic_vector(7 downto 0);
@@ -187,7 +186,7 @@ begin
    bank_3: bank_register port map (d, bank3_wr, bank3, reset_i, rom_boot_n);
 
    -- bank_i should be set at all times, depending on what is on a14 and 15
-   c_bank_multiplex: bank_multiplex port map (clk4_i, a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
+   c_bank_multiplex: bank_multiplex port map (a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
    
    bell_sel <= not(wr_n) and sel0(6);
    c_bell_latch: bell_latch port map (bell_sel, d(0), reset_i, bell);
@@ -262,7 +261,7 @@ begin
    sd_di <= '1';
    sd_clk <= '0';
 
-   process (sel1, rd_n) is
+   process (sel1, rd_n, ftdi_txe_n, ftdi_rxf_n) is
    begin
       if sel1(1) = '1' and rd_n = '0' then
          d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;

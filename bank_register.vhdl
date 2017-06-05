@@ -13,7 +13,7 @@ end bank_register;
 architecture behavioral of bank_register is
    signal data : std_logic_vector(7 downto 0) := "11000000";
 begin
-   process (clk, reset) is
+   process (clk, reset, rom_boot_n) is
    begin
       if reset = '1' then
          data <= "1" & rom_boot_n & "000000";
