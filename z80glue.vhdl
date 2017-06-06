@@ -218,7 +218,7 @@ begin
    ftdi_rd_n_i <= rd_n or ((mreq_n or ftdi_sel_n)
       -- or we're doing an IO read on the ftdi port (port 8)
       and (not sel1(0)));
-   ftdi_rd_n <= ftdi_rd_n_i;
+   ftdi_rd_n <= ftdi_rd_n_i or ftdi_rxf_n;
 
    -- ftdi_rxf_n is low when data is available
    -- need to wait if we're reading from the ftdi but data is not available
@@ -226,8 +226,8 @@ begin
       -- or wait if we're writing to the ftdi but the buffer is full
       and (ftdi_wr_n_i or not(ftdi_txe_n))
       -- or wait if we're using the screen and it's not ready yet
-      and scr_wait_n
-      and rom_wait_n;
+      and scr_wait_n;
+--      and rom_wait_n;
 
 
    -- enable the ram chip when ram is selected in the current bank
@@ -256,9 +256,9 @@ begin
    led(2) <= a(1);
    led(3) <= a(2);
    led(4) <= a(3);
-   led(5) <= sd_cd;
+   led(5) <= ftdi_rd_n_i;
    led(6) <= long_reset_n_i;
-   led(7) <= '0';
+   led(7) <= ftdi_rxf_n;
    
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);
