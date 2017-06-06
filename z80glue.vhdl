@@ -170,10 +170,11 @@ begin
    reset_i <= not(long_reset_n_i);
    reset_out_n <= long_reset_n_i;
    
-   -- decoder_oe enables the decoder output when an IO request is happening on 00000XXX.
+   -- decoder0_oe enables the decoder output when an IO request is happening on 00000XXX.
    decoder0_oe <= not(a(7) or a(6) or a(5) or a(4) or a(3) or iorq_n);
    c_decoder0: decoder port map (a(2 downto 0), decoder0_oe, sel0);
    
+   -- decoder1_oe enables the decoder output when an IO request is happening on 00001XXX.
    decoder1_oe <= not(a(7) or a(6) or a(5) or a(4) or not(a(3)) or iorq_n);
    c_decoder1: decoder port map (a(2 downto 0), decoder1_oe, sel1);
    
@@ -242,6 +243,8 @@ begin
    rom_waiter: waiter port map (clk4_i, rom_wait_start, rom_wait_n);
 
    -- addresses 0x20 to 0x2F are the rtc
+   -- that is, when an IO request is happening on 0010XXXX.
+   -- addresses 0x30 to 0x3F are not mapped to the rtc, but could potentially be in the future
    rtc_sel <= not(a(7)) and not(a(6)) and a(5) and not(a(4)) and not(iorq_n);
 
    rtc_ce_n <= not(rtc_sel);
