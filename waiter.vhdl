@@ -24,5 +24,5 @@ begin
          wait_n <= prev_wait;
       end if;
    end process;
-end Behavioral;
+end behavioral;
 
