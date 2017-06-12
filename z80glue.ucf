@@ -45,6 +45,7 @@ NET "D(7)" LOC = "56";
 NET "CLK4" BUFG = CLK;
 NET "CLK4" LOC = "FB3_2"; # GCK2
 NET "CLK4" PERIOD = 125ns;
+#NET "CLK4" PERIOD = 500ns;
 
 NET "INT_N" LOC = "33";
 NET "NMI_N" LOC = "34";
@@ -92,4 +93,5 @@ NET "RTC_WE_N" LOC = "6";
 NET "RTC_OE_N" LOC = "97";
 NET "RTC_CE_N" LOC = "95";
 
-NET "ROM_BOOT_N" LOC = "3";  # GTS2
+NET "ROM_BOOT_N" LOC = "1";  # GTS3
+# GTS1 (pin 3) seems to be dead

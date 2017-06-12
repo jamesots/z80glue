@@ -11,16 +11,16 @@ architecture behavior of bank_register_test is
    component bank_register is
        port ( d     : in  std_logic_vector(7 downto 0);
               clk   : in  std_logic;
-              oe    : in  std_logic;
               b     : out std_logic_vector(7 downto 0);
-              reset : in  std_logic);
+              reset : in  std_logic;
+              rom_boot_n : in std_logic);
    end component;
 
    --Inputs
    signal d : std_logic_vector(7 downto 0) := (others => '0');
    signal clk : std_logic := '0';
-   signal oe : std_logic := '0';
    signal reset : std_logic := '0';
+   signal rom_boot_n : std_logic := '1';
 
     --Outputs
    signal b : std_logic_vector(7 downto 0);
@@ -34,9 +34,9 @@ begin
    uut: bank_register port map (
           d => d,
           clk => clk,
-          oe => oe,
           b => b,
-          reset => reset
+          reset => reset,
+          rom_boot_n => rom_boot_n
         );
 
    -- Clock process definitions
@@ -53,16 +53,15 @@ begin
    stim_proc: process
    begin      
       reset <= '1';
-      oe <= '1';
+      rom_boot_n <= '0';
 
       wait for clk_period;      
       d <= "10101010";
       
       wait for clk_period;
-      oe <= '0';
+      reset <= '0';
       
       wait for clk_period;
-      reset <= '0';
       
       wait for clk_period;
 

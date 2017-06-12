@@ -134,7 +134,7 @@ architecture behavioral of z80glue is
    
    signal ftdi_rd_n_i : std_logic;
    signal ftdi_wr_n_i : std_logic;
-   
+
    signal reset_i   : std_logic;
    signal long_reset_n_i : std_logic;
 
@@ -162,6 +162,10 @@ architecture behavioral of z80glue is
    
    signal d_i : std_logic_vector(7 downto 0);
 begin
+   int_n <= '1';
+   nmi_n <= '1';
+   busrq_n <= '1';
+
    clk_div_c: clk_div port map (clk16, clk4_i);
    clk4 <= clk4_i;
 
@@ -169,7 +173,7 @@ begin
    c_reset: reset port map (clk4_i, reset_in_n, long_reset_n_i);
    reset_i <= not(long_reset_n_i);
    reset_out_n <= long_reset_n_i;
-   
+
    -- decoder0_oe enables the decoder output when an IO request is happening on 00000XXX.
    decoder0_oe <= not(a(7) or a(6) or a(5) or a(4) or a(3) or iorq_n);
    c_decoder0: decoder port map (a(2 downto 0), decoder0_oe, sel0);
@@ -226,8 +230,8 @@ begin
       -- or wait if we're writing to the ftdi but the buffer is full
       and (ftdi_wr_n_i or not(ftdi_txe_n))
       -- or wait if we're using the screen and it's not ready yet
-      and scr_wait_n;
---      and rom_wait_n;
+      and scr_wait_n
+      and rom_wait_n;
 
 
    -- enable the ram chip when ram is selected in the current bank
@@ -251,14 +255,24 @@ begin
    rtc_we_n <= io_wr_n or not(rtc_sel);
    rtc_oe_n <= io_rd_n or not(rtc_sel);
 
-   led(0) <= wait_n_i;
-   led(1) <= a(0);
-   led(2) <= a(1);
-   led(3) <= a(2);
-   led(4) <= a(3);
+--   led(7) <= clk4_i;
+--   led(6) <= d(6);
+--   led(5) <= d(5);
+--   led(4) <= d(4);
+--   led(3) <= d(3);
+--   led(2) <= d(2);
+--   led(1) <= d(1);
+--   led(0) <= d(0);
+   led(7) <= wait_n_i;
+   led(6) <= ftdi_rxf_n;
    led(5) <= ftdi_rd_n_i;
-   led(6) <= long_reset_n_i;
-   led(7) <= ftdi_rxf_n;
+--   led(4) <= clk4_i;
+   led(4) <= a(3);
+   led(3) <= a(2);
+   led(2) <= a(1);
+   led(1) <= a(0);
+   led(0) <= rom_boot_n;
+--   led(0) <= long_reset_n_i;
    
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);
@@ -277,4 +291,5 @@ begin
    end process;
    
    d <= d_i;
+
 end behavioral;
