@@ -3,24 +3,21 @@ use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.ALL;
 
 entity clk_div is
-    port ( clk16 : in  std_logic;
-           clk4  : out std_logic);
+    generic (count : integer);
+    port ( clk_in   : in  std_logic;
+           clk_out  : out std_logic);
 end clk_div;
 
 architecture behavioral of clk_div is
---   signal clk_count : unsigned(0 to 23) := "000000000000000000000000";
-   -- 0 to 1 = 8MHz
-   -- 0 to 2 = 4MHz
-   -- 0 to 23 = about 1Hz
-   signal clk_count : unsigned(0 to 1) := "00";
+   signal clk_count : unsigned(0 to count) := (others => '0');
 begin
-   clkdiv: process (clk16) is
+   clkdiv: process (clk_in) is
    begin
-      if rising_edge(clk16) then
+      if rising_edge(clk_in) then
          clk_count <= clk_count + 1;
       end if;
    end process;
    
-   clk4 <= clk_count(0);
+   clk_out <= clk_count(0);
 end behavioral;
 

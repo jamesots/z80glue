@@ -10,8 +10,8 @@ architecture behavior of clk_div_test is
     -- Component Declaration for the Unit Under Test (UUT)
  
    component clk_div is
-       port ( clk16 : in  std_logic;
-              clk4  : out std_logic);
+       port ( clk_in  : in  std_logic;
+              clk_out  : out std_logic);
    end component;
 
    --Inputs

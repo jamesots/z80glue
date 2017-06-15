@@ -1,4 +1,5 @@
 vhdl work "waiter.vhdl"
+vhdl work "spi.vhdl"
 vhdl work "screen_writer.vhdl"
 vhdl work "reset.vhdl"
 vhdl work "decoder.vhdl"

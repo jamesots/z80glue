@@ -4,7 +4,7 @@ use ieee.numeric_std.ALL;
 
 entity z80glue is
     port ( clk16      : in    std_logic;
-           clk4       : out   std_logic;
+           clk       : out   std_logic;
            led        : out   std_logic_vector(7 downto 0);
 
            -- Z80 signals
@@ -61,8 +61,9 @@ end z80glue;
 
 architecture behavioral of z80glue is
    component clk_div is
-       port ( clk16 : in  std_logic;
-              clk4  : out std_logic);
+       generic (count : integer);
+       port ( clk_in  : in  std_logic;
+              clk_out  : out std_logic);
    end component;
    component bank_register is
        port ( d     : in  std_logic_vector(7 downto 0);
@@ -106,7 +107,31 @@ architecture behavioral of z80glue is
               start  :  in std_logic;
               wait_n : out std_logic);
    end component;
+   component spi is
+      port ( clk   : in   std_logic;
+             reset : in   std_logic;
+             d_in  : in   std_logic_vector (7 downto 0);
+             d_out : out  std_logic_vector (7 downto 0);
+             e     : in   std_logic;
+             busy  : out  std_logic;
+             mosi  : out  std_logic;
+             miso  : in   std_logic;
+             mclk  : out  std_logic);
+   end component;
 
+   constant sel0_bank0 : integer := 0;
+   constant sel0_bank1 : integer := 1;
+   constant sel0_bank2 : integer := 2;
+   constant sel0_bank3 : integer := 3;
+   constant sel0_screen_inst : integer := 4;
+   constant sel0_screen_data : integer := 5;
+   constant sel0_bell : integer := 6;
+
+   constant sel1_ftdi_data : integer := 0;
+   constant sel1_ftdi_status : integer := 1;
+   constant sel1_sd : integer := 2;
+   constant sel1_sd_status : integer := 3;
+       
    signal wait_n_i : std_logic;
    
    signal bank0 : std_logic_vector(7 downto 0);
@@ -138,12 +163,6 @@ architecture behavioral of z80glue is
    signal reset_i   : std_logic;
    signal long_reset_n_i : std_logic;
 
-   type selection0 is
-      (sel_bank0, sel_bank1, sel_bank2, sel_bank3,
-       sel_screen_inst, sel_screen_data, sel_bell, sel_sd);
-   type selection1 is
-      (sel_ftdi_data, sel_ftdi_status);
-       
    signal scr_sel    : std_logic;
    signal scr_wait_n : std_logic;
        
@@ -158,7 +177,13 @@ architecture behavioral of z80glue is
    
    signal bell_sel : std_logic;
    
-   signal clk4_i : std_logic;
+   signal clk_i : std_logic;
+   
+   signal sd_sel      : std_logic;
+   signal sd_busy     : std_logic;
+   signal sd_clk_slow : std_logic;
+   signal sd_data     : std_logic_vector(7 downto 0);
+   signal sd_cs_n_i   : std_logic;
    
    signal d_i : std_logic_vector(7 downto 0);
 begin
@@ -166,11 +191,15 @@ begin
    nmi_n <= '1';
    busrq_n <= '1';
 
-   clk_div_c: clk_div port map (clk16, clk4_i);
-   clk4 <= clk4_i;
+   -- 1 should be 8MHz
+   c_clk_div: clk_div generic map (1) port map (clk16, clk_i);
+   clk <= clk_i;
+
+   -- 6 should be 250KHz
+   c_sd_clk_div: clk_div generic map (6) port map (clk_i, sd_clk_slow);
 
    -- the reset component makes sure the reset pulse is at least 3 clocks long
-   c_reset: reset port map (clk4_i, reset_in_n, long_reset_n_i);
+   c_reset: reset port map (clk_i, reset_in_n, long_reset_n_i);
    reset_i <= not(long_reset_n_i);
    reset_out_n <= long_reset_n_i;
 
@@ -183,10 +212,10 @@ begin
    c_decoder1: decoder port map (a(2 downto 0), decoder1_oe, sel1);
    
    -- bankX_wr is high when trying to do an OUT to the bank's address
-   bank0_wr <= sel0(0) and not(wr_n);
-   bank1_wr <= sel0(1) and not(wr_n);
-   bank2_wr <= sel0(2) and not(wr_n);
-   bank3_wr <= sel0(3) and not(wr_n);
+   bank0_wr <= sel0(sel0_bank0) and not(wr_n);
+   bank1_wr <= sel0(sel0_bank1) and not(wr_n);
+   bank2_wr <= sel0(sel0_bank2) and not(wr_n);
+   bank3_wr <= sel0(sel0_bank3) and not(wr_n);
    
    bank_0: bank_register port map (d, bank0_wr, bank0, reset_i, rom_boot_n);
    bank_1: bank_register port map (d, bank1_wr, bank1, reset_i, rom_boot_n);
@@ -196,11 +225,11 @@ begin
    -- bank_i should be set at all times, depending on what is on a14 and 15
    c_bank_multiplex: bank_multiplex port map (a(15 downto 14), bank0, bank1, bank2, bank3, bank_i);
    
-   bell_sel <= not(wr_n) and sel0(6);
+   bell_sel <= not(wr_n) and sel0(sel0_bell);
    c_bell_latch: bell_latch port map (bell_sel, d(0), reset_i, bell);
    
-   scr_sel <= sel0(4) or sel0(5);
-   c_screen_writer: screen_writer port map (clk4_i, scr_sel, scr_e_n, scr_wait_n);
+   scr_sel <= sel0(sel0_screen_inst) or sel0(sel0_screen_data);
+   c_screen_writer: screen_writer port map (clk_i, scr_sel, scr_e_n, scr_wait_n);
    scr_rs <= a(0);
    scr_rw <= wr_n;
 
@@ -215,13 +244,13 @@ begin
    io_wr_n <= wr_n or iorq_n;
 
    -- only allow writing to the ftdi with OUT instructions - memory mapping is a hack for bootstrapping the computer
-   ftdi_wr_n_i <= wr_n or not sel1(0);
+   ftdi_wr_n_i <= wr_n or not sel1(sel1_ftdi_data);
    ftdi_wr_n <= ftdi_wr_n_i;
 
    -- try to read from the ftdi if we're doing a memory read and the ftdi is selected
    ftdi_rd_n_i <= rd_n or ((mreq_n or ftdi_sel_n)
       -- or we're doing an IO read on the ftdi port (port 8)
-      and (not sel1(0)));
+      and (not sel1(sel1_ftdi_data)));
    ftdi_rd_n <= ftdi_rd_n_i or ftdi_rxf_n;
 
    -- ftdi_rxf_n is low when data is available
@@ -244,7 +273,7 @@ begin
    rom_oe_n <= mem_rd_n or rom_sel_n;
 
    rom_wait_start <= not(rom_sel_n or (mem_rd_n and mem_wr_n));
-   rom_waiter: waiter port map (clk4_i, rom_wait_start, rom_wait_n);
+   rom_waiter: waiter port map (clk_i, rom_wait_start, rom_wait_n);
 
    -- addresses 0x20 to 0x2F are the rtc
    -- that is, when an IO request is happening on 0010XXXX.
@@ -255,7 +284,7 @@ begin
    rtc_we_n <= io_wr_n or not(rtc_sel);
    rtc_oe_n <= io_rd_n or not(rtc_sel);
 
---   led(7) <= clk4_i;
+--   led(7) <= clk_i;
 --   led(6) <= d(6);
 --   led(5) <= d(5);
 --   led(4) <= d(4);
@@ -266,25 +295,40 @@ begin
    led(7) <= wait_n_i;
    led(6) <= ftdi_rxf_n;
    led(5) <= ftdi_rd_n_i;
---   led(4) <= clk4_i;
+--   led(4) <= clk_i;
    led(4) <= a(3);
    led(3) <= a(2);
    led(2) <= a(1);
-   led(1) <= a(0);
-   led(0) <= rom_boot_n;
+   led(1) <= sd_busy;
+   led(0) <= sd_cs_n_i;
 --   led(0) <= long_reset_n_i;
    
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);
 
-   sd_cs_n <= '1';
-   sd_di <= '1';
-   sd_clk <= '0';
-
-   process (sel1, rd_n, ftdi_txe_n, ftdi_rxf_n) is
+   sd_sel <= sel1(sel1_sd) and not(wr_n);
+   c_spi: spi port map (sd_clk_slow, reset_i, d, sd_data, sd_sel, sd_busy, sd_di, sd_do, sd_clk);
+   
+   process (clk_i, sel1, wr_n, d) is
    begin
-      if sel1(1) = '1' and rd_n = '0' then
+      if reset_i = '1' then
+         sd_cs_n_i <= '1';
+      elsif clk_i'event and clk_i = '1' then
+         if sel1(sel1_sd_status) = '1' and wr_n = '0' then
+            sd_cs_n_i <= d(0);
+         end if;
+      end if;
+   end process;
+   sd_cs_n <= sd_cs_n_i;
+
+   process (sel1, rd_n, ftdi_txe_n, ftdi_rxf_n, sd_busy, sd_cd, sd_do, sd_data) is
+   begin
+      if sel1(sel1_ftdi_status) = '1' and rd_n = '0' then
          d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;
+      elsif sel1(sel1_sd_status) = '1' and rd_n = '0' then
+         d_i <= "00000" & sd_busy & sd_cd & sd_do;
+      elsif sel1(sel1_sd) = '1' and rd_n = '0' then
+         d_i <= sd_data;
       else
          d_i <= "ZZZZZZZZ";
       end if;
