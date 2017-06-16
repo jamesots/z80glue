@@ -32,7 +32,7 @@ architecture behavioral of spi is
 
 begin
    -- 6 should be 250KHz
-   c_sd_clk_div: clk_div generic map (3) port map (clk, clk_slow);
+   c_sd_clk_div: clk_div generic map (6) port map (clk, clk_slow);
 
    process (clk, reset) is
    begin
@@ -67,16 +67,20 @@ begin
             else 
                if count < 8 then
                   stop <= '0';
-               else 
+                  busy_i <= '1';
+               elsif count = 8 then
                   stop <= '1';
+                  busy_i <= '1';
+               else 
+                  stop <= '0';
+                  busy_i <= '0';
                end if;
-               busy_i <= '1';
                mosi <= data(7);
                data <= data(6 downto 0) & miso;
             end if;
             count <= count + 1;
          else
-            d_out <= latched_data;
+            d_out <= data;
             busy_i <= '0';
             mosi <= '1';
             stop <= '0';
@@ -86,6 +90,6 @@ begin
    end process;
    
    
-   mclk <= busy_i and clk_slow;
+   mclk <= busy_i and not clk_slow;
    busy <= busy_i;
 end behavioral;

@@ -76,13 +76,14 @@ begin
       e <= '1';
       d_in <= "10110001";
       miso <= '1';
-      wait for clk_period;
+      wait for clk_period * 200;
       e <= '0';
       
-      wait for clk_period * 200;
       
+      wait for clk_period * 1020;
+
       e <= '1';
-      d_in <= "00110100";
+      d_in <= "10110001";
       miso <= '0';
       wait for clk_period;
       e <= '0';
