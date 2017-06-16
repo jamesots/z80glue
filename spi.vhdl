@@ -15,10 +15,25 @@ entity spi is
 end spi;
 
 architecture behavioral of spi is
+   component pulse_generator is
+       generic (count : integer);
+       port ( clk_in  : in  std_logic;
+              pulse   : out std_logic;
+              reset   : in std_logic);
+   end component;
+
+   signal clk_slow : std_logic;
+   signal pulse : std_logic;
+
+   signal clk_reset : std_logic;
+
    signal data : std_logic_vector (7 downto 0);
    signal count : integer range 0 to 7 := 7;
    signal busy_i : std_logic;
 begin
+   clk_reset <= reset or e;
+   c_pulse_generator: pulse_generator generic map (6) port map (clk, pulse, clk_reset);
+
    process (clk, reset) is
    begin
       if reset = '1' then
@@ -32,19 +47,24 @@ begin
             data <= d_in(6 downto 0) & miso;
             busy_i <= '1';
             count <= 0;
-         elsif count < 7 then
-            mosi <= data(7);
-            data <= data(6 downto 0) & miso;
-            count <= count + 1;
-            busy_i <= '1';
          else
-            d_out <= data;
-            busy_i <= '0';
-            mosi <= '1';
+            if pulse = '1' then
+                clk_slow = not clk_slow;
+                if count < 7 then
+                    mosi <= data(7);
+                    data <= data(6 downto 0) & miso;
+                    count <= count + 1;
+                    busy_i <= '1';
+                else
+                    d_out <= data;
+                    busy_i <= '0';
+                    mosi <= '1';
+                end if;          
+            end if;     
          end if;
       end if;
    end process;
-   
-   mclk <= busy_i and not clk;
+
+   mclk <= busy_i and clk_slow;
    busy <= busy_i;
 end behavioral;

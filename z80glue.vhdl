@@ -181,7 +181,6 @@ architecture behavioral of z80glue is
    
    signal sd_sel      : std_logic;
    signal sd_busy     : std_logic;
-   signal sd_clk_slow : std_logic;
    signal sd_data     : std_logic_vector(7 downto 0);
    signal sd_cs_n_i   : std_logic;
    
@@ -194,9 +193,6 @@ begin
    -- 1 should be 8MHz
    c_clk_div: clk_div generic map (1) port map (clk16, clk_i);
    clk <= clk_i;
-
-   -- 6 should be 250KHz
-   c_sd_clk_div: clk_div generic map (6) port map (clk_i, sd_clk_slow);
 
    -- the reset component makes sure the reset pulse is at least 3 clocks long
    c_reset: reset port map (clk_i, reset_in_n, long_reset_n_i);
@@ -307,7 +303,7 @@ begin
    b <= bank_i(4 downto 0);
 
    sd_sel <= sel1(sel1_sd) and not(wr_n);
-   c_spi: spi port map (sd_clk_slow, reset_i, d, sd_data, sd_sel, sd_busy, sd_di, sd_do, sd_clk);
+   c_spi: spi port map (clk_i, reset_i, d, sd_data, sd_sel, sd_busy, sd_di, sd_do, sd_clk);
    
    process (clk_i, sel1, wr_n, d) is
    begin
