@@ -79,7 +79,7 @@ begin
       wait for clk_period;
       e <= '0';
       
-      wait for clk_period * 10;
+      wait for clk_period * 200;
       
       e <= '1';
       d_in <= "00110100";

@@ -11,7 +11,7 @@ end clk_div;
 architecture behavioral of clk_div is
    signal clk_count : unsigned(0 to count) := (others => '0');
 begin
-   clkdiv: process (clk_in) is
+   process (clk_in) is
    begin
       if rising_edge(clk_in) then
          clk_count <= clk_count + 1;
