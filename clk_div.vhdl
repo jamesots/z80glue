@@ -9,7 +9,7 @@ entity clk_div is
 end clk_div;
 
 architecture behavioral of clk_div is
-   signal clk_count : unsigned(0 to count) := (others => '0');
+   signal clk_count : unsigned(0 to count - 1) := (others => '0');
 begin
    process (clk_in) is
    begin

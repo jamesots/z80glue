@@ -31,8 +31,8 @@ architecture behavioral of spi is
    signal clk_slow : std_logic;
 
 begin
-   -- 5 should be 125KHz
-   c_sd_clk_div: clk_div generic map (5) port map (clk, clk_slow);
+   -- 6 will divide 8MHz down to 125KHz
+   c_sd_clk_div: clk_div generic map (6) port map (clk, clk_slow);
 
    process (clk, reset) is
    begin
