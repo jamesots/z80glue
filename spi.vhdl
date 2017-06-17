@@ -28,11 +28,13 @@ architecture behavioral of spi is
    signal data : std_logic_vector (7 downto 0);
    signal count : integer range 0 to 9 := 0;
    signal busy_i : std_logic;
+   signal clk_fast : std_logic;
    signal clk_slow : std_logic;
-
+   
 begin
-   -- 6 will divide 8MHz down to 125KHz
-   c_sd_clk_div: clk_div generic map (6) port map (clk, clk_slow);
+   -- 5 will divide 8MHz down to 250KHz
+   -- then clk_slow is divided down to 125KHz
+   c_sd_clk_div: clk_div generic map (5) port map (clk, clk_fast);
 
    process (clk, reset) is
    begin
@@ -48,7 +50,7 @@ begin
       end if;
    end process;
    
-   process (clk_slow, reset) is
+   process (clk_fast, reset) is
    begin
       if reset = '1' then
          busy_i <= '0';
@@ -57,39 +59,46 @@ begin
          mosi <= '1';
          stop <= '0';
          d_out <= "00000000";
-      elsif clk_slow'event and clk_slow = '1' then
-         if go = '1' then
-            if count = 0 then
-               busy_i <= '0';
-               data <= latched_data;
-               stop <= '0';
-               mosi <= '1';
-            else 
-               if count < 8 then
-                  stop <= '0';
-                  busy_i <= '1';
-               elsif count = 8 then
-                  stop <= '1';
-                  busy_i <= '1';
-               else 
-                  stop <= '0';
+         clk_slow <= '0';
+      elsif clk_fast'event and clk_fast = '1' then
+         clk_slow <= not clk_slow;
+         if clk_slow = '1' then
+            if go = '1' then
+               if count = 0 then
                   busy_i <= '0';
+                  data <= latched_data;
+                  stop <= '0';
+                  mosi <= '1';
+               else 
+                  if count < 8 then
+                     stop <= '0';
+                     busy_i <= '1';
+                  elsif count = 8 then
+                     stop <= '1';
+                     busy_i <= '1';
+                  else 
+                     stop <= '0';
+                     busy_i <= '0';
+                  end if;
+                  mosi <= data(7);
                end if;
-               mosi <= data(7);
-               data <= data(6 downto 0) & miso;
+               count <= count + 1;
+            else
+               busy_i <= '0';
+               mosi <= '1';
+               stop <= '0';
+               count <= 0;
             end if;
-            count <= count + 1;
          else
-            d_out <= data;
-            busy_i <= '0';
-            mosi <= '1';
-            stop <= '0';
-            count <= 0;
+            if (count > 1) then
+               data <= data(6 downto 0) & miso;
+               d_out <= data(6 downto 0) & miso;
+            end if;
          end if;
       end if;
    end process;
    
    
-   mclk <= busy_i and not clk_slow;
+   mclk <= busy_i and clk_slow;
    busy <= busy_i or go;
 end behavioral;

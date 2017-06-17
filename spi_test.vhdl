@@ -79,6 +79,8 @@ begin
       wait for clk_period * 200;
       e <= '0';
       
+      wait for clk_period * 280;
+      miso <= '0';
       
       wait for clk_period * 1010;
 
