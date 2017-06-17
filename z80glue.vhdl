@@ -190,8 +190,8 @@ begin
    nmi_n <= '1';
    busrq_n <= '1';
 
-   -- 1 should be 8MHz
-   c_clk_div: clk_div generic map (1) port map (clk16, clk_i);
+   -- 0 should be 8MHz
+   c_clk_div: clk_div generic map (0) port map (clk16, clk_i);
    clk <= clk_i;
 
    -- the reset component makes sure the reset pulse is at least 3 clocks long

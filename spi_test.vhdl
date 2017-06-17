@@ -66,7 +66,7 @@ begin
    -- Stimulus process
    stim_proc: process
    begin		
-      wait for clk_period;
+      wait for clk_period / 2;
       reset <= '1';
       wait for clk_period;
       reset <= '0';
@@ -80,10 +80,10 @@ begin
       e <= '0';
       
       
-      wait for clk_period * 1020;
+      wait for clk_period * 1010;
 
       e <= '1';
-      d_in <= "10110001";
+      d_in <= "01100110";
       miso <= '0';
       wait for clk_period;
       e <= '0';
