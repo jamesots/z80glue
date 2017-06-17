@@ -91,5 +91,5 @@ begin
    
    
    mclk <= busy_i and not clk_slow;
-   busy <= busy_i;
+   busy <= busy_i or go;
 end behavioral;
