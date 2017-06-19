@@ -325,6 +325,14 @@ begin
          d_i <= "00000" & sd_busy & sd_cd & sd_do;
       elsif sel1(sel1_sd) = '1' and rd_n = '0' then
          d_i <= sd_data;
+      elsif sel0(sel0_bank0) = '1' and rd_n = '0' then
+         d_i <= bank0;
+      elsif sel0(sel0_bank1) = '1' and rd_n = '0' then
+         d_i <= bank1;
+      elsif sel0(sel0_bank2) = '1' and rd_n = '0' then
+         d_i <= bank2;
+      elsif sel0(sel0_bank3) = '1' and rd_n = '0' then
+         d_i <= bank3;
       else
          d_i <= "ZZZZZZZZ";
       end if;
