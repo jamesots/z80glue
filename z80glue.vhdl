@@ -255,8 +255,8 @@ begin
       -- or wait if we're writing to the ftdi but the buffer is full
       and (ftdi_wr_n_i or not(ftdi_txe_n))
       -- or wait if we're using the screen and it's not ready yet
-      and scr_wait_n;
---      and rom_wait_n;
+      and scr_wait_n
+      and rom_wait_n;
 
 
    -- enable the ram chip when ram is selected in the current bank
