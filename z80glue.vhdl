@@ -298,8 +298,8 @@ begin
    led(3) <= a(2);
    led(2) <= a(1);
    led(1) <= sd_busy;
-   led(0) <= sd_cs_n_i;
---   led(0) <= long_reset_n_i;
+--   led(0) <= sd_cs_n_i;
+   led(0) <= long_reset_n_i;
    
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);
@@ -323,20 +323,24 @@ begin
    process (clk_i)
    begin
       if clk_i'event and clk_i = '1' then
-         if sel1(sel1_ftdi_status) = '1' and rd_n = '0' then
-            d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;
-         elsif sel1(sel1_sd_status) = '1' and rd_n = '0' then
-            d_i <= "0000" & sd_fast & sd_busy & sd_cd & sd_do;
-         elsif sel1(sel1_sd) = '1' and rd_n = '0' then
-            d_i <= sd_data;
-         elsif sel0(sel0_bank0) = '1' and rd_n = '0' then
-            d_i <= bank0;
-         elsif sel0(sel0_bank1) = '1' and rd_n = '0' then
-            d_i <= bank1;
-         elsif sel0(sel0_bank2) = '1' and rd_n = '0' then
-            d_i <= bank2;
-         elsif sel0(sel0_bank3) = '1' and rd_n = '0' then
-            d_i <= bank3;
+         if rd_n = '0' then
+            if sel1(sel1_ftdi_status) = '1' then
+               d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;
+            elsif sel1(sel1_sd_status) = '1' then
+               d_i <= "0000" & sd_fast & sd_busy & sd_cd & sd_do;
+            elsif sel1(sel1_sd) = '1' then
+               d_i <= sd_data;
+            elsif sel0(sel0_bank0) = '1' then
+               d_i <= bank0;
+            elsif sel0(sel0_bank1) = '1' then
+               d_i <= bank1;
+            elsif sel0(sel0_bank2) = '1' then
+               d_i <= bank2;
+            elsif sel0(sel0_bank3) = '1' then
+               d_i <= bank3;
+            else
+               d_i <= "ZZZZZZZZ";
+            end if;
          else
             d_i <= "ZZZZZZZZ";
          end if;
