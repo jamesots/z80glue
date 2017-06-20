@@ -69,7 +69,7 @@ begin
    -- Stimulus process
    stim_proc: process
    begin		
-      fast <= '1';
+      fast <= '0';
       wait for clk_period / 2;
       reset <= '1';
       wait for clk_period;

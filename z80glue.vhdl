@@ -116,7 +116,8 @@ architecture behavioral of z80glue is
              busy  : out  std_logic;
              mosi  : out  std_logic;
              miso  : in   std_logic;
-             mclk  : out  std_logic);
+             mclk  : out  std_logic;
+             fast  : in   std_logic);
    end component;
 
    constant sel0_bank0 : integer := 0;
@@ -183,6 +184,7 @@ architecture behavioral of z80glue is
    signal sd_busy     : std_logic;
    signal sd_data     : std_logic_vector(7 downto 0);
    signal sd_cs_n_i   : std_logic;
+   signal sd_fast     : std_logic;
    
    signal d_i : std_logic_vector(7 downto 0);
 begin
@@ -303,38 +305,41 @@ begin
    b <= bank_i(4 downto 0);
 
    sd_sel <= sel1(sel1_sd) and not(wr_n);
-   c_spi: spi port map (clk_i, reset_i, d, sd_data, sd_sel, sd_busy, sd_di, sd_do, sd_clk);
+   c_spi: spi port map (clk_i, reset_i, d, sd_data, sd_sel, sd_busy, sd_di, sd_do, sd_clk, sd_fast);
    
-   process (clk_i, sel1, wr_n, d) is
+   process (clk_i, reset_i) is
    begin
       if reset_i = '1' then
          sd_cs_n_i <= '1';
       elsif clk_i'event and clk_i = '1' then
          if sel1(sel1_sd_status) = '1' and wr_n = '0' then
             sd_cs_n_i <= d(0);
+            sd_fast <= d(1);
          end if;
       end if;
    end process;
    sd_cs_n <= sd_cs_n_i;
 
-   process (sel1, rd_n, ftdi_txe_n, ftdi_rxf_n, sd_busy, sd_cd, sd_do, sd_data) is
+   process (clk_i)
    begin
-      if sel1(sel1_ftdi_status) = '1' and rd_n = '0' then
-         d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;
-      elsif sel1(sel1_sd_status) = '1' and rd_n = '0' then
-         d_i <= "00000" & sd_busy & sd_cd & sd_do;
-      elsif sel1(sel1_sd) = '1' and rd_n = '0' then
-         d_i <= sd_data;
-      elsif sel0(sel0_bank0) = '1' and rd_n = '0' then
-         d_i <= bank0;
-      elsif sel0(sel0_bank1) = '1' and rd_n = '0' then
-         d_i <= bank1;
-      elsif sel0(sel0_bank2) = '1' and rd_n = '0' then
-         d_i <= bank2;
-      elsif sel0(sel0_bank3) = '1' and rd_n = '0' then
-         d_i <= bank3;
-      else
-         d_i <= "ZZZZZZZZ";
+      if clk_i'event and clk_i = '1' then
+         if sel1(sel1_ftdi_status) = '1' and rd_n = '0' then
+            d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;
+         elsif sel1(sel1_sd_status) = '1' and rd_n = '0' then
+            d_i <= "0000" & sd_fast & sd_busy & sd_cd & sd_do;
+         elsif sel1(sel1_sd) = '1' and rd_n = '0' then
+            d_i <= sd_data;
+         elsif sel0(sel0_bank0) = '1' and rd_n = '0' then
+            d_i <= bank0;
+         elsif sel0(sel0_bank1) = '1' and rd_n = '0' then
+            d_i <= bank1;
+         elsif sel0(sel0_bank2) = '1' and rd_n = '0' then
+            d_i <= bank2;
+         elsif sel0(sel0_bank3) = '1' and rd_n = '0' then
+            d_i <= bank3;
+         else
+            d_i <= "ZZZZZZZZ";
+         end if;
       end if;
    end process;
    

@@ -24,6 +24,8 @@ architecture behavioral of spi is
    signal busy_i : std_logic;
    signal clk_slow : std_logic;
    
+   signal last_clk_count : std_logic;
+   
    -- 4 will divide 10MHz down to 312.5KHz
    -- then clk_slow is divided down to 156.25KHz
    signal clk_count : unsigned(0 to 4) := (others => '0');
@@ -38,12 +40,16 @@ begin
          mosi <= '1';
          d_out <= "00000000";
          clk_slow <= '0';
+         clk_count <= (others => '0');
+         last_clk_count <= '1';
       elsif clk'event and clk = '1' then
          if e = '1' then
             go <= '1';
             latched_data <= d_in;
          end if;
-         if (clk_count = 0) or (fast = '1') then
+         clk_count <= clk_count + 1;
+         last_clk_count <= clk_count(0);
+         if (clk_count(0) = '1' and last_clk_count = '0') or (fast = '1') then
             clk_slow <= not clk_slow;
             if clk_slow = '1' then
                if go = '1' then
