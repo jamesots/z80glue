@@ -18,7 +18,8 @@ architecture behavior of spi_test is
              busy  : out  std_logic;
              mosi  : out  std_logic;
              miso  : in   std_logic;
-             mclk  : out  std_logic);
+             mclk  : out  std_logic;
+             fast  : in   std_logic);
    end component;
     
 
@@ -28,6 +29,7 @@ architecture behavior of spi_test is
    signal d_in : std_logic_vector(7 downto 0) := (others => '0');
    signal e : std_logic := '0';
    signal miso : std_logic := '0';
+   signal fast : std_logic := '0';
 
  	--Outputs
    signal d_out : std_logic_vector(7 downto 0);
@@ -50,7 +52,8 @@ begin
           busy => busy,
           mosi => mosi,
           miso => miso,
-          mclk => mclk
+          mclk => mclk,
+          fast => fast
         );
 
    -- Clock process definitions
@@ -66,6 +69,7 @@ begin
    -- Stimulus process
    stim_proc: process
    begin		
+      fast <= '1';
       wait for clk_period / 2;
       reset <= '1';
       wait for clk_period;
@@ -76,7 +80,7 @@ begin
       e <= '1';
       d_in <= "10110001";
       miso <= '1';
-      wait for clk_period * 200;
+      wait for clk_period * 5;
       e <= '0';
       
       wait for clk_period * 280;
