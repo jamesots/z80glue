@@ -16,7 +16,6 @@ entity spi is
 end spi;
 
 architecture behavioral of spi is
-   signal go : std_logic;
 
    signal data : std_logic_vector (7 downto 0);
    signal count : integer range 0 to 8 := 0;
@@ -31,9 +30,10 @@ architecture behavioral of spi is
 begin
    process (clk, reset) is
       variable busy_i : std_logic := '0';
+      variable go : std_logic;
    begin
       if reset = '1' then
-         go <= '0';
+         go := '0';
          busy_i := '0';
          clk_enable <= '0';
          count <= 0;
@@ -46,6 +46,9 @@ begin
       elsif clk'event and clk = '1' then
          clk_count <= clk_count + 1;
          last_clk_count <= clk_count(0);
+         if go = '1' then
+            busy_i := '1';
+         end if;
          if (clk_count(0) = '1' and last_clk_count = '0') or (fast = '1') then
             clk_slow <= not clk_slow;
             if clk_slow = '1' then
@@ -54,7 +57,7 @@ begin
                      busy_i := '1';
                      clk_enable <= '1';
                   elsif count = 7 then
-                     go <= '0';
+                     go := '0';
                      busy_i := '1';
                      clk_enable <= '1';
                   else 
@@ -77,11 +80,8 @@ begin
             end if;
          end if;
          if e = '1' and busy_i = '0' then
-            go <= '1';
+            go := '1';
             data <= d_in;
-         end if;
-         if go = '1' then
-            busy_i := '1';
          end if;
       end if;
       busy <= busy_i;
