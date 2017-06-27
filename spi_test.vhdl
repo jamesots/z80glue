@@ -86,7 +86,7 @@ begin
       wait for clk_period * 240;
       miso <= '0';
       
-      wait for clk_period * 373;
+      wait for clk_period * 309;
 
       e <= '1';
       d_in <= "01100110";
@@ -94,6 +94,16 @@ begin
       wait for clk_period * 2;
       e <= '0';
 
+      wait for clk_period * 240;
+      miso <= '1';
+      
+      wait for clk_period * 375;
+
+      e <= '1';
+      d_in <= "01100110";
+      miso <= '0';
+      wait for clk_period * 2;
+      e <= '0';
       wait;
    end process;
 

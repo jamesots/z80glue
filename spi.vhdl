@@ -19,7 +19,7 @@ architecture behavioral of spi is
    signal go : std_logic;
 
    signal data : std_logic_vector (7 downto 0);
-   signal count : integer range 0 to 9 := 0;
+   signal count : integer range 0 to 8 := 0;
    signal clk_slow : std_logic;
    signal clk_enable : std_logic;
    
@@ -50,24 +50,18 @@ begin
             clk_slow <= not clk_slow;
             if clk_slow = '1' then
                if go = '1' then
-                  if count = 0 then
+                  if count < 7 then
                      busy_i := '1';
-                     clk_enable <= '0';
-                     mosi <= '1';
+                     clk_enable <= '1';
+                  elsif count = 7 then
+                     go <= '0';
+                     busy_i := '1';
+                     clk_enable <= '1';
                   else 
-                     if count < 8 then
-                        busy_i := '1';
-                        clk_enable <= '1';
-                     elsif count = 8 then
-                        go <= '0';
-                        busy_i := '1';
-                        clk_enable <= '1';
-                     else 
-                        busy_i := '0';
-                        clk_enable <= '0';
-                     end if;
-                     mosi <= data(7);
+                     busy_i := '0';
+                     clk_enable <= '0';
                   end if;
+                  mosi <= data(7);
                   count <= count + 1;
                else
                   busy_i := '0';
@@ -76,7 +70,7 @@ begin
                   count <= 0;
                end if;
             else
-               if (count > 1) then
+               if (count > 0) then
                   data <= data(6 downto 0) & miso;
                   d_out <= data(6 downto 0) & miso;
                end if;
