@@ -83,15 +83,15 @@ begin
       wait for clk_period * 5;
       e <= '0';
       
-      wait for clk_period * 280;
+      wait for clk_period * 240;
       miso <= '0';
       
-      wait for clk_period * 1010;
+      wait for clk_period * 373;
 
       e <= '1';
       d_in <= "01100110";
       miso <= '0';
-      wait for clk_period;
+      wait for clk_period * 2;
       e <= '0';
 
       wait;

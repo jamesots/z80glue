@@ -16,13 +16,12 @@ entity spi is
 end spi;
 
 architecture behavioral of spi is
-   signal latched_data : std_logic_vector (7 downto 0);
    signal go : std_logic;
 
    signal data : std_logic_vector (7 downto 0);
    signal count : integer range 0 to 9 := 0;
-   signal busy_i : std_logic;
    signal clk_slow : std_logic;
+   signal clk_enable : std_logic;
    
    signal last_clk_count : std_logic;
    
@@ -31,10 +30,12 @@ architecture behavioral of spi is
    signal clk_count : unsigned(0 to 4) := (others => '0');
 begin
    process (clk, reset) is
+      variable busy_i : std_logic := '0';
    begin
       if reset = '1' then
          go <= '0';
-         busy_i <= '0';
+         busy_i := '0';
+         clk_enable <= '0';
          count <= 0;
          data <= "00000000";
          mosi <= '1';
@@ -43,10 +44,6 @@ begin
          clk_count <= (others => '0');
          last_clk_count <= '1';
       elsif clk'event and clk = '1' then
-         if e = '1' then
-            go <= '1';
-            latched_data <= d_in;
-         end if;
          clk_count <= clk_count + 1;
          last_clk_count <= clk_count(0);
          if (clk_count(0) = '1' and last_clk_count = '0') or (fast = '1') then
@@ -54,23 +51,27 @@ begin
             if clk_slow = '1' then
                if go = '1' then
                   if count = 0 then
-                     busy_i <= '0';
-                     data <= latched_data;
+                     busy_i := '1';
+                     clk_enable <= '0';
                      mosi <= '1';
                   else 
                      if count < 8 then
-                        busy_i <= '1';
+                        busy_i := '1';
+                        clk_enable <= '1';
                      elsif count = 8 then
                         go <= '0';
-                        busy_i <= '1';
+                        busy_i := '1';
+                        clk_enable <= '1';
                      else 
-                        busy_i <= '0';
+                        busy_i := '0';
+                        clk_enable <= '0';
                      end if;
                      mosi <= data(7);
                   end if;
                   count <= count + 1;
                else
-                  busy_i <= '0';
+                  busy_i := '0';
+                  clk_enable <= '0';
                   mosi <= '1';
                   count <= 0;
                end if;
@@ -81,9 +82,16 @@ begin
                end if;
             end if;
          end if;
+         if e = '1' and busy_i = '0' then
+            go <= '1';
+            data <= d_in;
+         end if;
+         if go = '1' then
+            busy_i := '1';
+         end if;
       end if;
+      busy <= busy_i;
    end process;
    
-   mclk <= busy_i and clk_slow;
-   busy <= busy_i or go;
+   mclk <= clk_enable and clk_slow;
 end behavioral;
