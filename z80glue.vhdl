@@ -51,10 +51,15 @@ entity z80glue is
            
            sd_cd      : in    std_logic;
            sd_cs_n    : out   std_logic;
-           sd_di      : out   std_logic;
-           sd_do      : in    std_logic;
-           sd_clk     : out   std_logic;
+           sd_mosi    : in    std_logic; -- connect to sd_do, gets spi_mosi, only active when sd_cs_n is low
+
+           scr_mosi   : in    std_logic; -- connect to screen, only active when scr_cs_n is low
+           scr_cs_n   : out   std_logic;
+           scr_dc     : out   std_logic;
            
+           spi_miso   : out   std_logic;
+           spi_clk    : out   std_logic;
+
            -- set low to boot from the ROM, high to boot from the FT245
            rom_boot_n : in    std_logic);
 end z80glue;
@@ -130,8 +135,8 @@ architecture behavioral of z80glue is
 
    constant sel1_ftdi_data : integer := 0;
    constant sel1_ftdi_status : integer := 1;
-   constant sel1_sd : integer := 2;
-   constant sel1_sd_status : integer := 3;
+   constant sel1_spi : integer := 2;
+   constant sel1_spi_status : integer := 3;
        
    signal wait_n_i : std_logic;
    
@@ -179,12 +184,15 @@ architecture behavioral of z80glue is
    signal bell_sel : std_logic;
    
    signal clk_i : std_logic;
-   
-   signal sd_sel      : std_logic;
-   signal sd_busy     : std_logic;
-   signal sd_data     : std_logic_vector(7 downto 0);
+
    signal sd_cs_n_i   : std_logic;
-   signal sd_fast     : std_logic;
+   signal scr_cs_n_i  : std_logic;
+   
+   signal spi_sel     : std_logic;
+   signal spi_busy    : std_logic;
+   signal spi_data    : std_logic_vector(7 downto 0);
+   signal spi_fast    : std_logic;  
+   signal spi_mosi    : std_logic;
    
    signal d_i : std_logic_vector(7 downto 0);
 begin
@@ -257,7 +265,7 @@ begin
       -- or wait if we're writing to the ftdi but the buffer is full
       and (ftdi_wr_n_i or not(ftdi_txe_n))
       -- or wait if we're using the spi and it's busy
-      and (not(sel1(sel1_sd)) or not(sd_busy))
+      and (not(sel1(sel1_spi)) or not(spi_busy))
       -- or wait if we're using the screen and it's not ready yet
       and scr_wait_n
       and rom_wait_n;
@@ -299,28 +307,36 @@ begin
    led(4) <= a(3);
    led(3) <= a(2);
    led(2) <= a(1);
-   led(1) <= sd_busy;
+   led(1) <= spi_busy;
 --   led(0) <= sd_cs_n_i;
    led(0) <= long_reset_n_i;
    
    wait_n <= wait_n_i;
    b <= bank_i(4 downto 0);
 
-   sd_sel <= sel1(sel1_sd) and not(wr_n);
-   c_spi: spi port map (clk_i, reset_i, d, sd_data, sd_sel, sd_busy, sd_di, sd_do, sd_clk, sd_fast);
+   spi_sel <= sel1(sel1_spi) and not(wr_n);
+   c_spi: spi port map (clk_i, reset_i, d, spi_data, spi_sel, spi_busy, spi_miso, spi_mosi, spi_clk, spi_fast);
+
+   spi_mosi <= (not(sd_cs_n_i) and sd_mosi) or (not(scr_cs_n_i) and scr_mosi);
    
    process (clk_i, reset_i) is
    begin
       if reset_i = '1' then
          sd_cs_n_i <= '1';
+         scr_cs_n_i <= '1';
       elsif clk_i'event and clk_i = '1' then
-         if sel1(sel1_sd_status) = '1' and wr_n = '0' then
+         if sel1(sel1_spi_status) = '1' and wr_n = '0' then
             sd_cs_n_i <= d(0);
-            sd_fast <= d(1);
+            spi_fast <= d(1);
+             -- all the z80 code already sends a zero here while not expecting to enable the screen
+             -- so I've inverted this bit, which isn't very nice. Also, it would be nicer if all the
+             -- cs values were next to each other
+            scr_cs_n_i <= not(d(2));
          end if;
       end if;
    end process;
    sd_cs_n <= sd_cs_n_i;
+   scr_cs_n <= scr_cs_n_i;
 
    process (clk_i)
    begin
@@ -328,10 +344,10 @@ begin
          if rd_n = '0' then
             if sel1(sel1_ftdi_status) = '1' then
                d_i <= "000000" & ftdi_txe_n & ftdi_rxf_n;
-            elsif sel1(sel1_sd_status) = '1' then
-               d_i <= "0000" & sd_fast & sd_busy & sd_cd & sd_do;
-            elsif sel1(sel1_sd) = '1' then
-               d_i <= sd_data;
+            elsif sel1(sel1_spi_status) = '1' then
+               d_i <= "0000" & spi_fast & spi_busy & sd_cd & sd_mosi;
+            elsif sel1(sel1_spi) = '1' then
+               d_i <= spi_data;
             elsif sel0(sel0_bank0) = '1' then
                d_i <= bank0;
             elsif sel0(sel0_bank1) = '1' then

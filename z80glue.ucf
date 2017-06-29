@@ -83,11 +83,16 @@ NET "SCR_RS" LOC = "96";
 NET "SCR_RW" LOC = "94";
 NET "SCR_E_N" LOC = "92";
 
+NET "SPI_MISO" LOC = "89";
+NET "SPI_CLK" LOC = "90";
+
 NET "SD_CD" LOC = "93";
 NET "SD_CS_N" LOC = "91";
-NET "SD_DI" LOC = "89";
-NET "SD_DO" LOC = "87";
-NET "SD_CLK" LOC = "90";
+NET "SD_MOSI" LOC = "87";
+
+NET "SCR_MOSI" LOC = "2"; # GTS4
+NET "SCR_CS_N" LOC = "3"; # GTS1
+NET "SCR_DC" LOC = "99";  # GSR
 
 NET "RTC_WE_N" LOC = "6";
 NET "RTC_OE_N" LOC = "97";
