@@ -265,7 +265,7 @@ begin
       -- or wait if we're writing to the ftdi but the buffer is full
       and (ftdi_wr_n_i or not(ftdi_txe_n))
       -- or wait if we're using the spi and it's busy
-      and (not(sel1(sel1_spi)) or not(spi_busy))
+      and (not(sel1(sel1_spi) or sel1(sel1_spi_status)) or not(spi_busy))
       -- or wait if we're using the screen and it's not ready yet
       and scr_wait_n
       and rom_wait_n;
@@ -332,6 +332,7 @@ begin
              -- so I've inverted this bit, which isn't very nice. Also, it would be nicer if all the
              -- cs values were next to each other
             scr_cs_n_i <= not(d(2));
+            scr_dc <= d(3);
          end if;
       end if;
    end process;

@@ -90,11 +90,11 @@ NET "SD_CD" LOC = "93";
 NET "SD_CS_N" LOC = "91";
 NET "SD_MOSI" LOC = "87";
 
-NET "SCR_MOSI" LOC = "2"; # GTS4
-NET "SCR_CS_N" LOC = "3"; # GTS1
-NET "SCR_DC" LOC = "99";  # GSR
+NET "SCR_MOSI" LOC = "2"; # GTS4  black
+NET "SCR_CS_N" LOC = "4"; # GTS2  blue 
+NET "SCR_DC" LOC = "99";  # GSR   white
 
-NET "RTC_WE_N" LOC = "6";
+NET "RTC_WE_N" LOC = "6"; 
 NET "RTC_OE_N" LOC = "97";
 NET "RTC_CE_N" LOC = "95";
 
