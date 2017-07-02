@@ -326,12 +326,9 @@ begin
          scr_cs_n_i <= '1';
       elsif clk_i'event and clk_i = '1' then
          if sel1(sel1_spi_status) = '1' and wr_n = '0' then
-            sd_cs_n_i <= d(0);
-            spi_fast <= d(1);
-             -- all the z80 code already sends a zero here while not expecting to enable the screen
-             -- so I've inverted this bit, which isn't very nice. Also, it would be nicer if all the
-             -- cs values were next to each other
-            scr_cs_n_i <= not(d(2));
+            spi_fast <= not d(0); -- default to fast
+            sd_cs_n_i <= not d(1);
+            scr_cs_n_i <= not d(2);
             scr_dc <= d(3);
          end if;
       end if;
