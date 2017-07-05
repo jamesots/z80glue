@@ -1,7 +1,7 @@
 vhdl work "waiter.vhdl"
 vhdl work "spi.vhdl"
-vhdl work "screen_writer.vhdl"
 vhdl work "reset.vhdl"
+vhdl work "expander.vhd"
 vhdl work "decoder.vhdl"
 vhdl work "clk_div.vhdl"
 vhdl work "bell_latch.vhdl"

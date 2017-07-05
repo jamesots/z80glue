@@ -101,12 +101,12 @@ architecture behavioral of z80glue is
              reset : in   std_logic;
              bells : out  std_logic);
    end component;
-   component screen_writer is
-      port ( clk    : in   std_logic;
-             sel    : in   std_logic;
-             e_n    : out  std_logic;
-             wait_n : out  std_logic);
-   end component;
+--   component screen_writer is
+--      port ( clk    : in   std_logic;
+--             sel    : in   std_logic;
+--             e_n    : out  std_logic;
+--             wait_n : out  std_logic);
+--   end component;
    component waiter is
        port ( clk    :  in std_logic;
               start  :  in std_logic;
@@ -124,6 +124,16 @@ architecture behavioral of z80glue is
              mclk  : out  std_logic;
              fast  : in   std_logic);
    end component;
+   component expander is
+      port ( reset    : in  std_logic;
+             clk      : in  std_logic;
+             data     : in  std_logic_vector(7 downto 0);
+             wr       : in  std_logic;
+             spi_e    : out std_logic;
+             spi_data : out std_logic_vector(7 downto 0);
+             spi_busy : in  std_logic;
+             busy     : out std_logic);
+   end component;
 
    constant sel0_bank0 : integer := 0;
    constant sel0_bank1 : integer := 1;
@@ -137,6 +147,7 @@ architecture behavioral of z80glue is
    constant sel1_ftdi_status : integer := 1;
    constant sel1_spi : integer := 2;
    constant sel1_spi_status : integer := 3;
+   constant sel1_expander : integer := 4;
        
    signal wait_n_i : std_logic;
    
@@ -169,8 +180,8 @@ architecture behavioral of z80glue is
    signal reset_i   : std_logic;
    signal long_reset_n_i : std_logic;
 
-   signal scr_sel    : std_logic;
-   signal scr_wait_n : std_logic;
+--   signal scr_sel    : std_logic;
+--   signal scr_wait_n : std_logic;
        
    signal ram_sel_n  : std_logic;
    signal rom_sel_n  : std_logic;
@@ -193,6 +204,12 @@ architecture behavioral of z80glue is
    signal spi_data    : std_logic_vector(7 downto 0);
    signal spi_fast    : std_logic;  
    signal spi_mosi    : std_logic;
+   signal spi_data_in : std_logic_vector(7 downto 0);
+
+   signal expander_busy  : std_logic;
+   signal expander_wr    : std_logic;
+   signal expander_spi_e : std_logic;
+   signal expander_data  : std_logic_vector(7 downto 0);
    
    signal d_i : std_logic_vector(7 downto 0);
 begin
@@ -234,10 +251,10 @@ begin
    bell_sel <= not(wr_n) and sel0(sel0_bell);
    c_bell_latch: bell_latch port map (bell_sel, d(0), reset_i, bell);
    
-   scr_sel <= sel0(sel0_screen_inst) or sel0(sel0_screen_data);
-   c_screen_writer: screen_writer port map (clk_i, scr_sel, scr_e_n, scr_wait_n);
-   scr_rs <= a(0);
-   scr_rw <= wr_n;
+--   scr_sel <= sel0(sel0_screen_inst) or sel0(sel0_screen_data);
+--   c_screen_writer: screen_writer port map (clk_i, scr_sel, scr_e_n, scr_wait_n);
+--   scr_rs <= a(0);
+--   scr_rw <= wr_n;
 
    ftdi_sel_n <= (not(bank_i(7)) or not(bank_i(6)) or mreq_n);   -- ftdi = 11xxxxxx
    ram_sel_n <= bank_i(7) or mreq_n;                             -- ram  = 0xxxxxxx
@@ -266,8 +283,9 @@ begin
       and (ftdi_wr_n_i or not(ftdi_txe_n))
       -- or wait if we're using the spi and it's busy
       and (not(sel1(sel1_spi) or sel1(sel1_spi_status)) or not(spi_busy))
+      and (not(sel1(sel1_expander)) or not(expander_busy))
       -- or wait if we're using the screen and it's not ready yet
-      and scr_wait_n
+--      and scr_wait_n
       and rom_wait_n;
 
 
@@ -315,7 +333,8 @@ begin
    b <= bank_i(4 downto 0);
 
    spi_sel <= sel1(sel1_spi) and not(wr_n);
-   c_spi: spi port map (clk_i, reset_i, d, spi_data, spi_sel, spi_busy, spi_miso, spi_mosi, spi_clk, spi_fast);
+   spi_data_in <= d;
+   c_spi: spi port map (clk_i, reset_i, expander_data, spi_data, spi_sel, spi_busy, spi_miso, spi_mosi, spi_clk, spi_fast);
 
    spi_mosi <= (not(sd_cs_n_i) and sd_mosi) or (not(scr_cs_n_i) and scr_mosi);
    
@@ -335,6 +354,9 @@ begin
    end process;
    sd_cs_n <= sd_cs_n_i;
    scr_cs_n <= scr_cs_n_i;
+
+   expander_wr <= sel1(sel1_expander);
+   c_expander: expander port map (reset_i, clk_i, d, expander_wr, expander_spi_e, expander_data, spi_busy, expander_busy);
 
    process (clk_i)
    begin
